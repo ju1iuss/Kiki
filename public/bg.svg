@@ -1,0 +1,37 @@
+<svg width="1194" height="436" viewBox="0 0 1194 436" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_42_2)">
+<g filter="url(#filter0_fn_42_2)">
+<path d="M-719 -561H1913V1672H-719V-561Z" fill="url(#paint0_radial_42_2)"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_fn_42_2" x="-797.348" y="-639.348" width="2788.7" height="2389.7" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="39.1741" result="effect1_foregroundBlur_42_2"/>
+<feTurbulence type="fractalNoise" baseFrequency="2.172351598739624 2.172351598739624" stitchTiles="stitch" numOctaves="3" result="noise" seed="6195" />
+<feColorMatrix in="noise" type="luminanceToAlpha" result="alphaNoise" />
+<feComponentTransfer in="alphaNoise" result="coloredNoise1">
+<feFuncA type="discrete" tableValues="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 "/>
+</feComponentTransfer>
+<feComposite operator="in" in2="effect1_foregroundBlur_42_2" in="coloredNoise1" result="noise1Clipped" />
+<feFlood flood-color="rgba(71, 71, 71, 0.3)" result="color1Flood" />
+<feComposite operator="in" in2="noise1Clipped" in="color1Flood" result="color1" />
+<feMerge result="effect2_noise_42_2">
+<feMergeNode in="effect1_foregroundBlur_42_2" />
+<feMergeNode in="color1" />
+</feMerge>
+</filter>
+<radialGradient id="paint0_radial_42_2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(597 555.5) rotate(90) scale(1116.5 1316)">
+<stop offset="0.149038" stop-color="#FF3300"/>
+<stop offset="0.225962" stop-color="#FF7F29"/>
+<stop offset="0.293269" stop-color="#817FC2"/>
+<stop offset="0.322115" stop-color="#382DAD" stop-opacity="0.9"/>
+<stop offset="0.370192" stop-color="#D9D9D9" stop-opacity="0.5"/>
+<stop offset="0.403846" stop-opacity="0"/>
+</radialGradient>
+<clipPath id="clip0_42_2">
+<rect width="1194" height="436" fill="white"/>
+</clipPath>
+</defs>
+</svg>
