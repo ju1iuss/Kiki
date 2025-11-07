@@ -6,7 +6,6 @@ export default function Features() {
             <div className="mx-auto max-w-5xl space-y-8 px-6 md:space-y-16">
                 <div className="relative z-10 mx-auto max-w-xl space-y-6 text-center md:space-y-12">
                     <h2 className="text-balance text-4xl font-normal lg:text-5xl" style={{ letterSpacing: '-0.05em' }}>Everything Runs on Autopilot</h2>
-                    <p>Stop paying $5K/month per social media manager. Our automated accounts do it all—and they never sleep.</p>
                 </div>
 
                 <div className="relative mx-auto grid max-w-4xl divide-x divide-y border *:p-12 sm:grid-cols-2 lg:grid-cols-3">
@@ -56,6 +55,10 @@ export default function Features() {
                         </div>
                         <p className="text-sm">Track what works. Optimize automatically.</p>
                     </div>
+                </div>
+
+                <div className="relative z-10 mx-auto max-w-xl text-center">
+                    <p>Stop paying $5K/month per social media manager. Our automated accounts do it all—and they never sleep.</p>
                 </div>
             </div>
         </section>

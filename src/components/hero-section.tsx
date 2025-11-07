@@ -121,7 +121,7 @@ export default function HeroSection() {
                                     <Image
                                         src="/bg.svg"
                                         alt="background gradient"
-                                        className="w-full h-auto opacity-95"
+                                        className="hidden md:block w-full h-auto opacity-95"
                                         width="1194"
                                         height="436"
                                     />
@@ -151,11 +151,7 @@ export default function HeroSection() {
                                                 alt="User" 
                                                 className="w-7 h-7 rounded-full border-2 border-background"
                                             />
-                                            <img 
-                                                src="https://randomuser.me/api/portraits/women/65.jpg" 
-                                                alt="User" 
-                                                className="w-7 h-7 rounded-full border-2 border-background"
-                                            />
+                                            
                                             <img 
                                                 src="https://randomuser.me/api/portraits/men/54.jpg" 
                                                 alt="User" 
@@ -167,7 +163,7 @@ export default function HeroSection() {
                                                 className="w-7 h-7 rounded-full border-2 border-background"
                                             />
                                         </div>
-                                        <span className="text-foreground text-sm">60+ Clients Scaling</span>
+                                        <span className="text-foreground text-sm">Rolled out to 72 users & scaling</span>
 
                                             
                                     </Link>

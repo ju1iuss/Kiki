@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Tasy - Automate Your Social Media Managers",
   description: "Automated accounts, automated attention, automated growth. We create the accounts, post your content, and engage like humans.",
   icons: {
-    icon: '/favicon.svg',
+    icon: '/favicon.ico',
   },
 };
 
@@ -28,9 +28,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${schibstedGrotesk.variable} ${merriweather.variable} font-sans antialiased`}
+        className={`${schibstedGrotesk.variable} ${merriweather.variable} font-sans antialiased m-0 p-0 h-full`}
         style={{ letterSpacing: '-0.08em' }}
       >
         {children}

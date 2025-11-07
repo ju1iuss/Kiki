@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Logo } from '@/components/logo'
-import { InfiniteSlider } from '@/components/ui/infinite-slider'
+import Link from 'next/link'
 
 export default function ApplyPage() {
     const [step, setStep] = useState(1)
@@ -18,33 +18,82 @@ export default function ApplyPage() {
     const [name, setName] = useState('')
     const [company, setCompany] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isLoadingNext, setIsLoadingNext] = useState(false)
     const [showQueuePosition, setShowQueuePosition] = useState(false)
     const [showPriorityPackage, setShowPriorityPackage] = useState(false)
+    const [showPayment, setShowPayment] = useState(false)
+    const [showCapacityMessage, setShowCapacityMessage] = useState(false)
     const [queuePosition, setQueuePosition] = useState(0)
 
-    const handleNext = () => {
-        if (step < 4) setStep(step + 1)
+    const handleNext = async () => {
+        if (step === 3 && (!email || !name)) {
+            return // Don't proceed if required fields are empty
+        }
+        if (step === 3) {
+            setIsLoadingNext(true)
+            
+            // Save to waitlist via Supabase Edge Function
+            try {
+                const finalUserType = userType === 'other' ? otherType : userType
+                await fetch('https://zcftkbpfekuvatkiiujq.supabase.co/functions/v1/waitlist-save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        name,
+                        company,
+                        accountCount,
+                        userType: finalUserType,
+                    }),
+                })
+            } catch (error) {
+                console.error('Error saving to waitlist:', error)
+                // Continue even if save fails
+            }
+            
+            setTimeout(() => {
+                setIsLoadingNext(false)
+                setStep(4)
+            }, 1500)
+            return
+        }
+        if (step < 5) setStep(step + 1)
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleSubmit = async () => {
         setIsSubmitting(true)
         
-        // Generate random queue position
-        const position = Math.floor(Math.random() * (1200 - 300 + 1)) + 300
-        setQueuePosition(position)
-        
-        // After 3 seconds, move to step 4 and show queue position
-        setTimeout(() => {
+        try {
+            // Create Stripe checkout session via Supabase Edge Function
+            const response = await fetch('https://zcftkbpfekuvatkiiujq.supabase.co/functions/v1/waitlist-checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    name,
+                    accountCount,
+                    userType: userType === 'other' ? otherType : userType,
+                    company,
+                }),
+            })
+
+            const data = await response.json()
+
+            if (data.url) {
+                // Redirect to Stripe checkout
+                window.location.href = data.url
+            } else {
+                throw new Error(data.error || 'Failed to create checkout session')
+            }
+        } catch (error) {
+            console.error('Error:', error)
             setIsSubmitting(false)
-            setStep(4)
-            setShowQueuePosition(true)
-        }, 3000)
-        
-        // After 2 more seconds (5 total), show priority package
-        setTimeout(() => {
-            setShowPriorityPackage(true)
-        }, 5000)
+            // You might want to show an error message to the user here
+        }
     }
 
     // Auto-advance when user type is selected
@@ -56,21 +105,42 @@ export default function ApplyPage() {
         }
     }, [userType, otherType, step])
 
+    // Handle step 4 timing: show capacity message after 1 second, then payment after 4 seconds
+    useEffect(() => {
+        if (step === 4) {
+            setShowPayment(false)
+            setShowCapacityMessage(false)
+            // Show capacity message after 1 second (fade in)
+            const capacityTimer = setTimeout(() => {
+                setShowCapacityMessage(true)
+            }, 1000)
+            // Then show payment section after 4 seconds total
+            const paymentTimer = setTimeout(() => {
+                setShowPayment(true)
+            }, 4000)
+            return () => {
+                clearTimeout(capacityTimer)
+                clearTimeout(paymentTimer)
+            }
+        } else {
+            setShowPayment(false)
+            setShowCapacityMessage(false)
+        }
+    }, [step])
+
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900 flex items-center justify-center py-8">
-            <div className="container mx-auto px-4 max-w-2xl">
+        <div className="min-h-screen bg-gradient-to-b from-zinc-50 to-zinc-100 dark:from-zinc-950 dark:to-zinc-900 flex items-center justify-center py-8 px-4">
+            <div className="w-full max-w-2xl flex flex-col items-center">
                 <div className="mb-8 flex flex-col items-center gap-6">
                     <Logo />
-                    {step === 1 && (
                         <div className="text-center max-w-md">
                             <h2 className="text-xl md:text-2xl font-medium" style={{ letterSpacing: '-0.05em' }}>Due to extreme demand, we are application-only</h2>
                         </div>
-                    )}
                 </div>
 
-                <div className="bg-card/95 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 p-8 min-h-[500px] flex flex-col">
-                    <div className="flex-1 space-y-6">
+                <div className="bg-card/95 backdrop-blur-md border-2 border-gray-200 dark:border-gray-800 p-8 min-h-[500px] flex flex-col w-full">
+                    <div className={`flex-1 ${step === 1 || step === 2 || step === 3 || step === 4 ? 'flex flex-col justify-center' : 'space-y-6'}`}>
                         {/* Step 1: User Type Selection */}
                         {step === 1 && (
                         <div className="space-y-4 animate-in fade-in duration-300">
@@ -118,9 +188,9 @@ export default function ApplyPage() {
                         {/* Step 2: Account Selection */}
                         {step === 2 && (
                             <div className="space-y-4 animate-in fade-in duration-300">
-                                <div className="text-center space-y-2">
-                                    <h2 className="text-base font-semibold">On how many accounts do you want to post?</h2>
-                                    <p className="text-xs text-muted-foreground max-w-md mx-auto">You can select up to 50 accounts and distribute content to them how you wish. Content will get distributed 2 posts per day max automatically on warmed up customized accounts for you.</p>
+                                <div className="text-center space-y-2 mb-6">
+                                    <h2 className="text-base font-semibold">How many accounts do you want to post on?</h2>
+                                    <p className="text-xs text-muted-foreground max-w-md mx-auto">Select up to 50 accounts. 2 posts/day/account. Distribute content however you'd like. Accounts will be warmed up and customized for you. (TikTok & Instagram)</p>
                                 </div>
                                 <div className="space-y-3 max-w-sm mx-auto">
                                     <div className="flex items-center gap-3">
@@ -162,10 +232,7 @@ export default function ApplyPage() {
                         {/* Step 3: Contact Information */}
                         {step === 3 && (
                             <div className="space-y-4 animate-in fade-in duration-300">
-                                <div className="text-center space-y-1">
-                                    <h2 className="text-base font-semibold">Your information</h2>
-                                </div>
-                                <form onSubmit={handleSubmit} className="space-y-3 max-w-sm mx-auto">
+                                <div className="space-y-3 max-w-sm mx-auto">
                                     <div className="space-y-1">
                                         <Label htmlFor="name" className="text-xs">Full Name</Label>
                                         <Input
@@ -207,105 +274,134 @@ export default function ApplyPage() {
                                     </div>
                                     
                                     <Button 
-                                        type="submit" 
-                                        disabled={isSubmitting}
+                                        type="button" 
+                                        onClick={handleNext}
+                                        disabled={isSubmitting || isLoadingNext}
                                         className="w-full active:scale-95 transition-transform duration-150" 
                                         size="default">
-                                        {isSubmitting ? (
+                                        {isLoadingNext ? (
                                             <>
                                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                Submitting...
+                                                Checking availability...
                                             </>
                                         ) : (
-                                            'Submit Application'
+                                            'Next'
                                         )}
                                     </Button>
-                                </form>
+                                </div>
                             </div>
                         )}
 
-                        {/* Step 4: Queue Position and Priority Package */}
+                        {/* Step 4: Capacity Message + Payment */}
                         {step === 4 && (
-                            <div className="space-y-4 animate-in fade-in duration-300">
-                                {/* Queue Position Display */}
-                                {showQueuePosition && (
-                                    <div className="flex flex-col items-center justify-center py-8 animate-in fade-in duration-700">
-                                        <div className="text-center space-y-2 mb-6">
-                                            <h2 className="text-base font-semibold">Your Queue Position</h2>
-                                        </div>
-                                        <div className="text-3xl font-thin text-black dark:text-white tabular-nums tracking-tight">
-                                            #{queuePosition}
-                                        </div>
-                                    </div>
-                                )}
+                            <div className="space-y-4">
+                                <div className={`text-center space-y-4 max-w-md mx-auto transition-opacity duration-1000 ${showCapacityMessage ? 'opacity-100' : 'opacity-0'}`}>
+                                    <h2 className="text-xl font-semibold">
+                                        We've Hit <span className="text-[#ED5A0B] font-bold text-2xl">100/100</span> Capacity
+                                    </h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        You're on our secondary waitlist without priority access. We're processing applications in order, and there are hundreds ahead of you.
+                                    </p>
+                                </div>
                                 
+                                {/* Payment Section */}
+                                {showPayment && (
+                                    <div className="text-center space-y-4 max-w-md mx-auto animate-in fade-in duration-300">
                                 {/* Priority Package Display */}
-                                {showPriorityPackage && (
-                                    <div className="space-y-4 animate-in fade-in duration-1000 pt-6 max-w-sm mx-auto">
-                                        <div className="text-center space-y-3">
-                                            <div>
+                                        <div className="space-y-4 pt-6">
                                                 <div className="bg-background border-2 border-[#ED5A0B] p-4">
-                                                    <div className="flex items-baseline justify-between mb-2">
-                                                        <span className="text-base font-bold">First Account</span>
+                                                <div className="flex items-baseline justify-between mb-3">
+                                                    <span className="text-base font-bold">Pre-order 1 account & get priority access</span>
                                                         <div>
                                                             <span className="text-2xl font-bold text-[#ED5A0B]">€50</span>
                                                             <span className="text-sm text-muted-foreground line-through ml-2">€125</span>
-                                                        </div>
                                                     </div>
-                                                    <p className="text-xs text-muted-foreground mb-3">60% OFF - Limited to 100 priority spots</p>
-                                                    
-                                                    <ul className="space-y-1.5 mb-4 text-xs">
-                                                        <li className="flex items-center gap-2">
-                                                            <Check className="w-3 h-3 text-[#ED5A0B]" />
-                                                            <span>Skip the queue (567+ people)</span>
-                                                        </li>
-                                                        <li className="flex items-center gap-2">
-                                                            <Check className="w-3 h-3 text-[#ED5A0B]" />
-                                                            <span>Get to be first of 100 users</span>
-                                                        </li>
-                                                        <li className="flex items-center gap-2">
-                                                            <Check className="w-3 h-3 text-[#ED5A0B]" />
-                                                            <span>Priority onboarding support</span>
-                                                        </li>
-                                                        <li className="flex items-center gap-2">
-                                                            <Check className="w-3 h-3 text-[#ED5A0B]" />
-                                                            <span>First account at 60% discount</span>
-                                                        </li>
-                                                    </ul>
+                                                        </div>
+                                                        
+                                                <div className="space-y-2 mb-4">
+                                                    <div className="flex items-start gap-2">
+                                                        <Check className="w-3 h-3 text-[#ED5A0B] mt-0.5 flex-shrink-0" />
+                                                        <p className="text-xs">100% money-back guarantee if you decide not to proceed—no questions asked</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-2">
+                                                        <Check className="w-3 h-3 text-[#ED5A0B] mt-0.5 flex-shrink-0" />
+                                                        <p className="text-xs">Skip 500+ people waiting in line & get priority access when accounts are ready</p>
+                                                    </div>
+                                                    <div className="flex items-start gap-2">
+                                                        <Check className="w-3 h-3 text-[#ED5A0B] mt-0.5 flex-shrink-0" />
+                                                        <p className="text-xs">Your first account (worth €125/month) included at no extra cost</p>
+                                                    </div>
+                                                </div>
 
                                                     <Button 
+                                                    onClick={handleSubmit}
+                                                    disabled={isSubmitting}
                                                         className="w-full active:scale-95 transition-transform duration-150 text-sm"
                                                         size="default">
-                                                        Get priority now
+                                                    {isSubmitting ? (
+                                                        <>
+                                                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                                            Processing...
+                                                        </>
+                                                    ) : (
+                                                        'Pre-order'
+                                                    )}
                                                     </Button>
-                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 )}
                             </div>
                         )}
+
+                        {/* Step 5: Confirmation */}
+                        {step === 5 && (
+                            <div className="space-y-4 animate-in fade-in duration-300">
+                                <div className="text-center space-y-3 max-w-md mx-auto">
+                                    <h2 className="text-xl font-semibold">Thank you for securing your spot!</h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        Your application has been submitted successfully.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                <p className="text-center text-xs text-muted-foreground mt-6">
-                    Your information is secure and will only be used to review your application.
-                </p>
-
-                {/* Logo Cloud */}
-                <div className="mt-8 overflow-hidden">
-                    <div className="relative">
-                        <InfiniteSlider
-                            speedOnHover={20}
-                            speed={40}
-                            gap={80}>
-                            <img className="h-4 w-fit opacity-50 dark:invert" src="https://html.tailus.io/blocks/customers/nvidia.svg" alt="Nvidia" />
-                            <img className="h-3 w-fit opacity-50 dark:invert" src="https://html.tailus.io/blocks/customers/column.svg" alt="Column" />
-                            <img className="h-3 w-fit opacity-50 dark:invert" src="https://html.tailus.io/blocks/customers/github.svg" alt="GitHub" />
-                            <img className="h-4 w-fit opacity-50 dark:invert" src="https://html.tailus.io/blocks/customers/nike.svg" alt="Nike" />
-                            <img className="h-4 w-fit opacity-50 dark:invert" src="https://html.tailus.io/blocks/customers/lemonsqueezy.svg" alt="Lemon Squeezy" />
-                        </InfiniteSlider>
+                <div className="mt-8 flex justify-center">
+                    <Link
+                        href="#link"
+                        className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-3 rounded-full border p-1 pl-4 pr-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
+                        <div className="flex -space-x-2">
+                            <img 
+                                src="https://randomuser.me/api/portraits/men/32.jpg" 
+                                alt="User" 
+                                className="w-7 h-7 rounded-full border-2 border-background"
+                            />
+                            
+                            <img 
+                                src="https://randomuser.me/api/portraits/men/86.jpg" 
+                                alt="User" 
+                                className="w-7 h-7 rounded-full border-2 border-background"
+                            />
+                            <img 
+                                src="https://randomuser.me/api/portraits/women/65.jpg" 
+                                alt="User" 
+                                className="w-7 h-7 rounded-full border-2 border-background"
+                            />
+                            <img 
+                                src="https://randomuser.me/api/portraits/men/54.jpg" 
+                                alt="User" 
+                                className="w-7 h-7 rounded-full border-2 border-background"
+                            />
+                            <img 
+                                src="https://randomuser.me/api/portraits/women/23.jpg" 
+                                alt="User" 
+                                className="w-7 h-7 rounded-full border-2 border-background"
+                            />
                     </div>
+                        <span className="text-foreground text-sm">Rolled out to 72 users & scaling</span>
+                    </Link>
                 </div>
             </div>
         </div>
