@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Schibsted_Grotesk, Merriweather } from "next/font/google";
 import "./globals.css";
+import { LanguageWrapper } from "@/components/language-wrapper";
 
 const schibstedGrotesk = Schibsted_Grotesk({
   subsets: ["latin"],
@@ -33,7 +34,9 @@ export default function RootLayout({
         className={`${schibstedGrotesk.variable} ${merriweather.variable} font-sans antialiased m-0 p-0 h-full`}
         style={{ letterSpacing: '-0.08em' }}
       >
-        {children}
+        <LanguageWrapper>
+          {children}
+        </LanguageWrapper>
       </body>
     </html>
   );

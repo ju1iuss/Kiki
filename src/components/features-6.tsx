@@ -1,13 +1,17 @@
+'use client'
+
 import { Upload, Sparkles, Zap, Video } from 'lucide-react'
 import Image from 'next/image'
+import { useLanguage } from '@/contexts/language-context'
 
 export default function FeaturesSection() {
+    const { t } = useLanguage()
     return (
         <section id="solution" className="py-16 md:py-32">
             <div className="mx-auto max-w-5xl space-y-12 px-6">
                 <div className="relative z-10 grid items-center gap-4 md:grid-cols-2 md:gap-12">
-                    <h2 className="text-4xl font-semibold" style={{ letterSpacing: '-0.05em' }}>Content Creation Built In</h2>
-                    <p className="max-w-sm sm:ml-auto">Upload or generate your content in bulk in less than a couple of minutes. No more manual posting across multiple accounts.</p>
+                    <h2 className="text-4xl font-semibold" style={{ letterSpacing: '-0.05em' }}>{t('content.title')}</h2>
+                    <p className="max-w-sm sm:ml-auto">{t('content.subtitle')}</p>
                 </div>
                 <div className="px-3 pt-3 md:-mx-8">
                     <div className="aspect-88/36 mask-b-from-75% mask-b-to-95% relative rounded-xl overflow-hidden">
@@ -38,31 +42,31 @@ export default function FeaturesSection() {
                     <div className="space-y-3">
                         <div className="flex items-center gap-2">
                             <Upload className="size-4" />
-                            <h3 className="text-sm font-medium">Bulk Upload</h3>
+                            <h3 className="text-sm font-medium">{t('content.bulkUpload')}</h3>
                         </div>
-                        <p className="text-muted-foreground text-sm">Upload multiple videos at once and distribute them across all your accounts.</p>
+                        <p className="text-muted-foreground text-sm">{t('content.bulkUploadDesc')}</p>
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
                             <Sparkles className="size-4" />
-                            <h3 className="text-sm font-medium">AI Generation</h3>
+                            <h3 className="text-sm font-medium">{t('content.aiGeneration')}</h3>
                         </div>
-                        <p className="text-muted-foreground text-sm">Generate content ideas and captions powered by AI in seconds.</p>
+                        <p className="text-muted-foreground text-sm">{t('content.aiGenerationDesc')}</p>
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
                             <Zap className="size-4" />
-                            <h3 className="text-sm font-medium">Lightning Fast</h3>
+                            <h3 className="text-sm font-medium">{t('content.lightningFast')}</h3>
                         </div>
-                        <p className="text-muted-foreground text-sm">Create and schedule content for all accounts in under 2 minutes.</p>
+                        <p className="text-muted-foreground text-sm">{t('content.lightningFastDesc')}</p>
                     </div>
                     <div className="space-y-2">
                         <div className="flex items-center gap-2">
                             <Video className="size-4" />
 
-                            <h3 className="text-sm font-medium">Smart Distribution</h3>
+                            <h3 className="text-sm font-medium">{t('content.smartDistribution')}</h3>
                         </div>
-                        <p className="text-muted-foreground text-sm">Automatically distribute content across accounts with optimal timing.</p>
+                        <p className="text-muted-foreground text-sm">{t('content.smartDistributionDesc')}</p>
                     </div>
                 </div>
             </div>

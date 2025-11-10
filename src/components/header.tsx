@@ -5,17 +5,19 @@ import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import React from 'react'
 import { cn } from '@/lib/utils'
-
-const menuItems = [
-    { name: 'Features', href: '#features' },
-    { name: 'Solution', href: '#solution' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'About', href: '#faq' },
-]
+import { useLanguage } from '@/contexts/language-context'
 
 export const HeroHeader = () => {
+    const { t } = useLanguage()
     const [menuState, setMenuState] = React.useState(false)
     const [isScrolled, setIsScrolled] = React.useState(false)
+    
+    const menuItems = [
+        { name: t('header.features'), href: '#features' },
+        { name: t('header.solution'), href: '#solution' },
+        { name: t('header.pricing'), href: '#pricing' },
+        { name: t('header.about'), href: '#faq' },
+    ]
 
     React.useEffect(() => {
         const handleScroll = () => {
@@ -83,7 +85,7 @@ export const HeroHeader = () => {
                                     size="sm"
                                     className="active:scale-95 transition-transform duration-150">
                                     <Link href="/apply">
-                                        <span className="text-xs">Apply Now</span>
+                                        <span className="text-xs">{t('header.apply')}</span>
                                     </Link>
                                 </Button>
                             </div>

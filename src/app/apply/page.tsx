@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Logo } from '@/components/logo'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/language-context'
 
 export default function ApplyPage() {
+    const { t } = useLanguage()
     const [step, setStep] = useState(1)
     const [userType, setUserType] = useState('')
     const [otherType, setOtherType] = useState('')
@@ -135,7 +137,7 @@ export default function ApplyPage() {
                 <div className="mb-8 flex flex-col items-center gap-6">
                     <Logo />
                         <div className="text-center max-w-md">
-                            <h2 className="text-xl md:text-2xl font-medium" style={{ letterSpacing: '-0.05em' }}>Due to extreme demand, we are application-only</h2>
+                            <h2 className="text-xl md:text-2xl font-medium" style={{ letterSpacing: '-0.05em' }}>{t('apply.title')}</h2>
                         </div>
                 </div>
 
@@ -145,27 +147,27 @@ export default function ApplyPage() {
                         {step === 1 && (
                         <div className="space-y-4 animate-in fade-in duration-300">
                             <div className="text-center space-y-1">
-                                <h2 className="text-base font-semibold">What best describes you?</h2>
+                                <h2 className="text-base font-semibold">{t('apply.userType.question')}</h2>
                             </div>
                             <RadioGroup value={userType} onValueChange={setUserType} className="space-y-1 max-w-sm mx-auto">
                                 <div className="flex items-center justify-center px-4 py-3 border-2 hover:bg-muted/50 hover:border-[#ED5A0B] transition-colors cursor-pointer">
-                                    <Label htmlFor="brand-owner" className="text-base cursor-pointer text-center w-full">Brand Owner</Label>
+                                    <Label htmlFor="brand-owner" className="text-base cursor-pointer text-center w-full">{t('apply.userType.brandOwner')}</Label>
                                     <RadioGroupItem value="brand-owner" id="brand-owner" className="sr-only" />
                                 </div>
                                 <div className="flex items-center justify-center px-4 py-3 border-2 hover:bg-muted/50 hover:border-[#ED5A0B] transition-colors cursor-pointer">
-                                    <Label htmlFor="agency" className="text-base cursor-pointer text-center w-full">Agency</Label>
+                                    <Label htmlFor="agency" className="text-base cursor-pointer text-center w-full">{t('apply.userType.agency')}</Label>
                                     <RadioGroupItem value="agency" id="agency" className="sr-only" />
                                 </div>
                                 <div className="flex items-center justify-center px-4 py-3 border-2 hover:bg-muted/50 hover:border-[#ED5A0B] transition-colors cursor-pointer">
-                                    <Label htmlFor="affiliate" className="text-base cursor-pointer text-center w-full">Affiliate</Label>
+                                    <Label htmlFor="affiliate" className="text-base cursor-pointer text-center w-full">{t('apply.userType.affiliate')}</Label>
                                     <RadioGroupItem value="affiliate" id="affiliate" className="sr-only" />
                                 </div>
                                 <div className="flex items-center justify-center px-4 py-3 border-2 hover:bg-muted/50 hover:border-[#ED5A0B] transition-colors cursor-pointer">
-                                    <Label htmlFor="founder" className="text-base cursor-pointer text-center w-full">Founder</Label>
+                                    <Label htmlFor="founder" className="text-base cursor-pointer text-center w-full">{t('apply.userType.founder')}</Label>
                                     <RadioGroupItem value="founder" id="founder" className="sr-only" />
                                 </div>
                                 <div className="flex items-center justify-center px-4 py-3 border-2 hover:bg-muted/50 hover:border-[#ED5A0B] transition-colors cursor-pointer">
-                                    <Label htmlFor="other" className="text-base cursor-pointer text-center w-full">Other</Label>
+                                    <Label htmlFor="other" className="text-base cursor-pointer text-center w-full">{t('apply.userType.other')}</Label>
                                     <RadioGroupItem value="other" id="other" className="sr-only" />
                                 </div>
                             </RadioGroup>
@@ -174,7 +176,7 @@ export default function ApplyPage() {
                                 <div className="space-y-1 animate-in fade-in duration-300 max-w-sm mx-auto">
                                     <Input
                                         type="text"
-                                        placeholder="Please specify..."
+                                        placeholder={t('apply.userType.specify')}
                                         value={otherType}
                                         onChange={(e) => setOtherType(e.target.value)}
                                         className="h-9 text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
@@ -189,8 +191,8 @@ export default function ApplyPage() {
                         {step === 2 && (
                             <div className="space-y-4 animate-in fade-in duration-300">
                                 <div className="text-center space-y-2 mb-6">
-                                    <h2 className="text-base font-semibold">How many accounts do you want to post on?</h2>
-                                    <p className="text-xs text-muted-foreground max-w-md mx-auto">Select up to 50 accounts. 2 posts/day/account. Distribute content however you'd like. Accounts will be warmed up and customized for you. (TikTok & Instagram)</p>
+                                    <h2 className="text-base font-semibold">{t('apply.accounts.question')}</h2>
+                                    <p className="text-xs text-muted-foreground max-w-md mx-auto">{t('apply.accounts.description')}</p>
                                 </div>
                                 <div className="space-y-3 max-w-sm mx-auto">
                                     <div className="flex items-center gap-3">
@@ -205,7 +207,7 @@ export default function ApplyPage() {
                                         <div className="flex-1 text-center bg-muted/40 py-4 border-2">
                                             <div className="text-4xl font-bold tabular-nums">{accountCount}</div>
                                             <div className="text-xs text-muted-foreground mt-1">
-                                                accounts
+                                                {t('apply.accounts.label')}
                                             </div>
                                         </div>
                                         <Button
@@ -223,7 +225,7 @@ export default function ApplyPage() {
                                 </div>
                                 <div className="max-w-sm mx-auto">
                                     <Button onClick={handleNext} className="w-full active:scale-95 transition-transform duration-150" size="default">
-                                        Continue
+                                        {t('apply.continue')}
                                     </Button>
                                 </div>
                             </div>
@@ -234,7 +236,7 @@ export default function ApplyPage() {
                             <div className="space-y-4 animate-in fade-in duration-300">
                                 <div className="space-y-3 max-w-sm mx-auto">
                                     <div className="space-y-1">
-                                        <Label htmlFor="name" className="text-xs">Full Name</Label>
+                                        <Label htmlFor="name" className="text-xs">{t('apply.contact.name')}</Label>
                                         <Input
                                             id="name"
                                             type="text"
@@ -248,7 +250,7 @@ export default function ApplyPage() {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <Label htmlFor="email" className="text-xs">Email</Label>
+                                        <Label htmlFor="email" className="text-xs">{t('apply.contact.email')}</Label>
                                         <Input
                                             id="email"
                                             type="email"
@@ -261,11 +263,11 @@ export default function ApplyPage() {
                                         />
                                     </div>
                                     <div className="space-y-1">
-                                        <Label htmlFor="company" className="text-xs">Company (Optional)</Label>
+                                        <Label htmlFor="company" className="text-xs">{t('apply.contact.company')}</Label>
                                         <Input
                                             id="company"
                                             type="text"
-                                            placeholder="Your Company Inc."
+                                            placeholder={t('apply.contact.companyOptional')}
                                             value={company}
                                             onChange={(e) => setCompany(e.target.value)}
                                             disabled={isSubmitting}
@@ -282,10 +284,10 @@ export default function ApplyPage() {
                                         {isLoadingNext ? (
                                             <>
                                                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                Checking availability...
+                                                {t('apply.contact.checking')}
                                             </>
                                         ) : (
-                                            'Next'
+                                            t('apply.contact.next')
                                         )}
                                     </Button>
                                 </div>
@@ -297,10 +299,10 @@ export default function ApplyPage() {
                             <div className="space-y-4">
                                 <div className={`text-center space-y-4 max-w-md mx-auto transition-opacity duration-1000 ${showCapacityMessage ? 'opacity-100' : 'opacity-0'}`}>
                                     <h2 className="text-xl font-semibold">
-                                        We've Hit <span className="text-[#ED5A0B] font-bold text-2xl">100/100</span> Capacity
+                                        {t('apply.capacity.title')} <span className="text-[#ED5A0B] font-bold text-2xl">{t('apply.capacity.count')}</span> Capacity
                                     </h2>
                                     <p className="text-sm text-muted-foreground">
-                                        You're on our secondary waitlist without priority access. We're processing applications in order, and there are hundreds ahead of you.
+                                        {t('apply.capacity.message')}
                                     </p>
                                 </div>
                                 
@@ -311,25 +313,25 @@ export default function ApplyPage() {
                                         <div className="space-y-4 pt-6">
                                                 <div className="bg-background border-2 border-[#ED5A0B] p-4">
                                                 <div className="flex items-baseline justify-between mb-3">
-                                                    <span className="text-base font-bold">Pre-order 1 account & get priority access</span>
+                                                    <span className="text-base font-bold">{t('apply.priority.title')}</span>
                                                         <div>
-                                                            <span className="text-2xl font-bold text-[#ED5A0B]">€50</span>
-                                                            <span className="text-sm text-muted-foreground line-through ml-2">€125</span>
+                                                            <span className="text-2xl font-bold text-[#ED5A0B]">{t('apply.priority.price')}</span>
+                                                            <span className="text-sm text-muted-foreground line-through ml-2">{t('apply.priority.originalPrice')}</span>
                                                     </div>
                                                         </div>
                                                         
                                                 <div className="space-y-2 mb-4">
                                                     <div className="flex items-start gap-2">
                                                         <Check className="w-3 h-3 text-[#ED5A0B] mt-0.5 flex-shrink-0" />
-                                                        <p className="text-xs">100% money-back guarantee if you decide not to proceed—no questions asked</p>
+                                                        <p className="text-xs">{t('apply.priority.guarantee')}</p>
                                                     </div>
                                                     <div className="flex items-start gap-2">
                                                         <Check className="w-3 h-3 text-[#ED5A0B] mt-0.5 flex-shrink-0" />
-                                                        <p className="text-xs">Skip 500+ people waiting in line & get priority access when accounts are ready</p>
+                                                        <p className="text-xs">{t('apply.priority.skip')}</p>
                                                     </div>
                                                     <div className="flex items-start gap-2">
                                                         <Check className="w-3 h-3 text-[#ED5A0B] mt-0.5 flex-shrink-0" />
-                                                        <p className="text-xs">Your first account (worth €125/month) included at no extra cost</p>
+                                                        <p className="text-xs">{t('apply.priority.account')}</p>
                                                     </div>
                                                 </div>
 
@@ -341,10 +343,10 @@ export default function ApplyPage() {
                                                     {isSubmitting ? (
                                                         <>
                                                             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                                            Processing...
+                                                            {t('apply.priority.processing')}
                                                         </>
                                                     ) : (
-                                                        'Pre-order'
+                                                        t('apply.priority.preorder')
                                                     )}
                                                     </Button>
                                             </div>
@@ -358,9 +360,9 @@ export default function ApplyPage() {
                         {step === 5 && (
                             <div className="space-y-4 animate-in fade-in duration-300">
                                 <div className="text-center space-y-3 max-w-md mx-auto">
-                                    <h2 className="text-xl font-semibold">Thank you for securing your spot!</h2>
+                                    <h2 className="text-xl font-semibold">{t('apply.success.title')}</h2>
                                     <p className="text-sm text-muted-foreground">
-                                        Your application has been submitted successfully.
+                                        {t('apply.success.message')}
                                     </p>
                                 </div>
                             </div>
@@ -374,33 +376,32 @@ export default function ApplyPage() {
                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-3 rounded-full border p-1 pl-4 pr-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
                         <div className="flex -space-x-2">
                             <img 
-                                src="https://randomuser.me/api/portraits/men/32.jpg" 
-                                alt="User" 
-                                className="w-7 h-7 rounded-full border-2 border-background"
-                            />
-                            
-                            <img 
-                                src="https://randomuser.me/api/portraits/men/86.jpg" 
+                                src="https://i.pravatar.cc/150?img=12" 
                                 alt="User" 
                                 className="w-7 h-7 rounded-full border-2 border-background"
                             />
                             <img 
-                                src="https://randomuser.me/api/portraits/women/65.jpg" 
+                                src="https://i.pravatar.cc/150?img=33" 
                                 alt="User" 
                                 className="w-7 h-7 rounded-full border-2 border-background"
                             />
                             <img 
-                                src="https://randomuser.me/api/portraits/men/54.jpg" 
+                                src="https://i.pravatar.cc/150?img=47" 
                                 alt="User" 
                                 className="w-7 h-7 rounded-full border-2 border-background"
                             />
                             <img 
-                                src="https://randomuser.me/api/portraits/women/23.jpg" 
+                                src="https://i.pravatar.cc/150?img=52" 
+                                alt="User" 
+                                className="w-7 h-7 rounded-full border-2 border-background"
+                            />
+                            <img 
+                                src="https://i.pravatar.cc/150?img=68" 
                                 alt="User" 
                                 className="w-7 h-7 rounded-full border-2 border-background"
                             />
                     </div>
-                        <span className="text-foreground text-sm">Rolled out to 72 users & scaling</span>
+                        <span className="text-foreground text-sm">{t('apply.rolledOut')}</span>
                     </Link>
                 </div>
             </div>

@@ -1,65 +1,69 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { X, Check } from 'lucide-react'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/language-context'
 
-const tableData = [
+export default function PricingComparator() {
+    const { t } = useLanguage()
+    
+    const tableData = [
     {
-        feature: 'Account Creation & Management',
+        feature: t('comparator.accountCreation'),
         diy: false,
         freelancer: false,
         tasy: true,
     },
     {
-        feature: 'Automated Content Posting',
+        feature: t('comparator.automatedPosting'),
         diy: false,
         freelancer: false,
         tasy: true,
     },
     {
-        feature: 'Human-Like Engagement',
+        feature: t('comparator.humanLikeEngagement'),
         diy: false,
         freelancer: '~50 actions/day',
         tasy: true,
     },
     {
-        feature: 'Real Device Deployment',
+        feature: t('comparator.realDeviceDeployment'),
         diy: false,
         freelancer: false,
         tasy: true,
     },
     {
-        feature: 'Scale to 100+ Accounts',
+        feature: t('comparator.scale'),
         diy: false,
         freelancer: false,
         tasy: true,
     },
     {
-        feature: 'Performance Analytics',
-        diy: 'Basic',
-        freelancer: 'Manual Reports',
-        tasy: 'Real-time Dashboard',
+        feature: t('comparator.performanceAnalytics'),
+        diy: t('comparator.basic'),
+        freelancer: t('comparator.manualReports'),
+        tasy: t('comparator.realTimeDashboard'),
     },
     {
-        feature: 'Monthly Cost',
-        diy: 'Your Time',
+        feature: t('comparator.monthlyCost'),
+        diy: t('comparator.yourTime'),
         freelancer: '$5K+ per account',
-        tasy: '€125 per account',
+        tasy: t('comparator.perAccount'),
     },
     {
-        feature: 'Time Required',
-        diy: '20+ hours/week',
-        freelancer: 'Weekly management',
-        tasy: '0 hours',
+        feature: t('comparator.timeRequired'),
+        diy: t('comparator.hoursPerWeek'),
+        freelancer: t('comparator.weeklyManagement'),
+        tasy: t('comparator.zeroHours'),
     },
 ]
-
-export default function PricingComparator() {
     return (
         <section className="py-16 md:py-32">
             <div className="mx-auto max-w-5xl px-6">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-medium mb-4" style={{ letterSpacing: '-0.05em' }}>Why Choose Tasy?</h2>
-                    <p className="text-muted-foreground">Compare your options for managing multiple social media accounts</p>
+                    <h2 className="text-3xl md:text-4xl font-medium mb-4" style={{ letterSpacing: '-0.05em' }}>{t('comparator.title')}</h2>
+                    <p className="text-muted-foreground">{t('comparator.subtitle')}</p>
                 </div>
                 <div className="w-full overflow-auto lg:overflow-visible">
                     <table className="w-[200vw] border-separate border-spacing-x-3 md:w-full dark:[--color-muted:var(--color-zinc-900)]">
@@ -67,16 +71,16 @@ export default function PricingComparator() {
                             <tr className="*:py-4 *:text-left *:font-medium">
                                 <th className="lg:w-2/5"></th>
                                 <th className="space-y-3">
-                                    <span className="block text-sm">Do It Yourself</span>
+                                    <span className="block text-sm">{t('comparator.diy')}</span>
                                 </th>
                                 <th className="space-y-3">
-                                    <span className="block text-sm">Freelancer/VA</span>
+                                    <span className="block text-sm">{t('comparator.freelancer')}</span>
                                 </th>
                                 <th className="bg-[#ED5A0B]/10 dark:bg-[#ED5A0B]/20 rounded-t-(--radius) space-y-3 px-4 relative">
                                     <div className="flex items-center gap-2 justify-start">
-                                        <span className="block text-sm font-bold">Tasy</span>
+                                        <span className="block text-sm font-bold">{t('comparator.tasy')}</span>
                                         <div className="bg-[#ED5A0B] text-white text-[10px] px-2 py-0.5 rounded-full whitespace-nowrap">
-                                            Best Choice
+                                            {t('comparator.bestChoice')}
                                         </div>
                                     </div>
                                 </th>

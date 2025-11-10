@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { TextEffect } from '@/components/ui/text-effect'
 import { AnimatedGroup } from '@/components/ui/animated-group'
 import { HeroHeader } from './header'
+import { useLanguage } from '@/contexts/language-context'
 
 const transitionVariants = {
     item: {
@@ -31,6 +32,7 @@ const transitionVariants = {
 }
 
 export default function HeroSection() {
+    const { t } = useLanguage()
 
     return (
         <>
@@ -137,33 +139,32 @@ export default function HeroSection() {
                                         className="hover:bg-background dark:hover:border-t-border bg-muted group mx-auto flex w-fit items-center gap-3 rounded-full border p-1 pl-4 pr-4 shadow-md shadow-zinc-950/5 transition-colors duration-300 dark:border-t-white/5 dark:shadow-zinc-950">
                                         <div className="flex -space-x-2">
                                             <img 
-                                                src="https://randomuser.me/api/portraits/men/32.jpg" 
+                                                src="https://i.pravatar.cc/150?img=12" 
                                                 alt="User" 
                                                 className="w-7 h-7 rounded-full border-2 border-background"
                                             />
                                             <img 
-                                                src="https://randomuser.me/api/portraits/women/44.jpg" 
+                                                src="https://i.pravatar.cc/150?img=33" 
                                                 alt="User" 
                                                 className="w-7 h-7 rounded-full border-2 border-background"
                                             />
                                             <img 
-                                                src="https://randomuser.me/api/portraits/men/86.jpg" 
-                                                alt="User" 
-                                                className="w-7 h-7 rounded-full border-2 border-background"
-                                            />
-                                            
-                                            <img 
-                                                src="https://randomuser.me/api/portraits/men/54.jpg" 
+                                                src="https://i.pravatar.cc/150?img=47" 
                                                 alt="User" 
                                                 className="w-7 h-7 rounded-full border-2 border-background"
                                             />
                                             <img 
-                                                src="https://randomuser.me/api/portraits/women/23.jpg" 
+                                                src="https://i.pravatar.cc/150?img=52" 
+                                                alt="User" 
+                                                className="w-7 h-7 rounded-full border-2 border-background"
+                                            />
+                                            <img 
+                                                src="https://i.pravatar.cc/150?img=68" 
                                                 alt="User" 
                                                 className="w-7 h-7 rounded-full border-2 border-background"
                                             />
                                         </div>
-                                        <span className="text-foreground text-sm">Rolled out to 72 users & scaling</span>
+                                        <span className="text-foreground text-sm">{t('apply.rolledOut')}</span>
 
                                             
                                     </Link>
@@ -175,7 +176,7 @@ export default function HeroSection() {
                                     as="h1"
                                     className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-medium md:text-6xl lg:mt-10 xl:text-7xl"
                                     style={{ letterSpacing: '-0.05em' }}>
-                                    We Build, Warm-Up, and Grow Accounts That Print Views.
+                                    {t('hero.title')}
                                 </TextEffect>
                                 <TextEffect
                                     per="line"
@@ -184,7 +185,7 @@ export default function HeroSection() {
                                     delay={0.5}
                                     as="p"
                                     className="mx-auto mt-5 max-w-3xl text-balance text-lg md:text-xl">
-                                    You upload or generate content, we distribute it like 10 social media managers in one with human-like engagement patterns.
+                                    {t('hero.subtitle')}
                                 </TextEffect>
 
                                 <AnimatedGroup
@@ -206,7 +207,7 @@ export default function HeroSection() {
                                             size="lg"
                                             className="rounded-xl px-6 text-base active:scale-95 transition-transform duration-150 group">
                                             <Link href="/apply">
-                                                <span className="text-nowrap">Want Access? Apply Now</span>
+                                                <span className="text-nowrap">{t('hero.cta')}</span>
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
                                                     fill="none"
@@ -249,7 +250,7 @@ export default function HeroSection() {
                                     <Image
                                         className="bg-background relative w-full h-auto object-contain opacity-0 transition-opacity duration-700"
                                         src="/hero.png"
-                                        alt="Tasy Analytics Dashboard showing 15.5M views and 248K followers"
+                                        alt={t('hero.dashboardAlt')}
                                         width="3104"
                                         height="1992"
                                         onLoad={(e) => {

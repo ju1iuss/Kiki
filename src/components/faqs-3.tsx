@@ -3,6 +3,7 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/language-context'
 
 type FAQItem = {
     id: string
@@ -12,36 +13,38 @@ type FAQItem = {
 }
 
 export default function FAQsThree() {
+    const { t } = useLanguage()
+    
     const faqItems: FAQItem[] = [
         {
             id: 'item-1',
             icon: 'user-check',
-            question: 'How do you avoid getting accounts banned?',
-            answer: 'We create accounts on real devices with real IPs, warm them up for weeks with human-like behavior, and deploy them across different locations. Our accounts behave exactly like real users—watching content, engaging naturally, and following platform guidelines.',
+            question: t('faq.q1'),
+            answer: t('faq.a1'),
         },
         {
             id: 'item-2',
             icon: 'rocket',
-            question: 'How fast can I start posting?',
-            answer: 'Your accounts will be ready to deploy within 24 hours. However, for best results, we recommend letting us warm them up for 2-3 weeks before aggressive posting. This builds trust with platform algorithms and reduces the risk of flags.',
+            question: t('faq.q2'),
+            answer: t('faq.a2'),
         },
         {
             id: 'item-3',
             icon: 'video',
-            question: 'Do I need to create the videos myself?',
-            answer: 'You can provide your own videos, or we can generate them for you using Tasy AI. Just tell us your niche and messaging, and we\'ll handle the content creation, posting, and engagement—completely hands-off.',
+            question: t('faq.q3'),
+            answer: t('faq.a3'),
         },
         {
             id: 'item-4',
             icon: 'trending-up',
-            question: 'What kind of results can I expect?',
-            answer: 'Results vary by niche and content quality, but our clients typically see 10-50x more reach compared to single-account strategies. With 50+ accounts posting and engaging, you\'re essentially running a small media company on autopilot.',
+            question: t('faq.q4'),
+            answer: t('faq.a4'),
         },
         {
             id: 'item-5',
             icon: 'shield',
-            question: 'Is this safe and compliant?',
-            answer: 'We operate in a grey area. Platforms don\'t explicitly allow automated accounts, but they can\'t detect ours because we use real devices, real behavior, and smart engagement patterns. We take precautions to minimize risk, but there\'s always a small chance of account loss.',
+            question: t('faq.q5'),
+            answer: t('faq.a5'),
         },
     ]
 
@@ -51,13 +54,13 @@ export default function FAQsThree() {
                 <div className="flex flex-col gap-10 md:flex-row md:gap-16">
                     <div className="md:w-1/3">
                         <div className="sticky top-20">
-                            <h2 className="mt-4 text-3xl font-bold">Frequently Asked Questions</h2>
+                            <h2 className="mt-4 text-3xl font-bold">{t('faq.title')}</h2>
                             <p className="text-muted-foreground mt-4">
-                                Can't find what you're looking for? Contact our{' '}
+                                {t('faq.subtitle')}{' '}
                                 <Link
                                     href="#"
                                     className="text-primary font-medium hover:underline">
-                                    customer support team
+                                    {t('faq.contact')}
                                 </Link>
                             </p>
                         </div>
