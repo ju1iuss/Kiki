@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+
+# Allow important pages
+Allow: /
+Allow: /sign-in
+Allow: /sign-up
+Allow: /pricing
+
+# Sitemap
+Sitemap: https://app.tasy.ai/sitemap.xml
+

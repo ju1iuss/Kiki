@@ -31,7 +31,7 @@ export const HeroHeader = () => {
             <nav
                 data-state={menuState && 'active'}
                 className="fixed z-20 w-full px-2">
-                <div className={cn('mx-auto mt-2 max-w-6xl px-6 transition-all duration-300 lg:px-12', isScrolled && 'bg-background/20 max-w-4xl border border-gray-200/30 dark:border-gray-800/30 backdrop-blur-[2px] rounded-xl lg:px-5')}>
+                <div className={cn('mx-auto mt-2 max-w-6xl px-6 transition-all duration-300 lg:px-12', isScrolled && 'bg-background/10 max-w-4xl border border-gray-200/30 dark:border-gray-800/30 backdrop-blur-md rounded-full lg:px-5')}>
                     <div className="relative flex flex-wrap items-center justify-between gap-4 py-2 lg:gap-0 lg:py-2.5">
                         <div className="flex w-full justify-between lg:w-auto">
                             <Link
@@ -83,7 +83,7 @@ export const HeroHeader = () => {
                                 <Button
                                     asChild
                                     size="sm"
-                                    className="active:scale-95 transition-transform duration-150">
+                                    className="h-7 active:scale-95 transition-transform duration-150">
                                     <Link href="/apply">
                                         <span className="text-xs">{t('header.apply')}</span>
                                     </Link>

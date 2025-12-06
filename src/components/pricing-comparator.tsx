@@ -94,7 +94,7 @@ export default function PricingComparator() {
                                     <td className="text-muted-foreground font-medium">{row.feature}</td>
                                     <td>
                                         {row.diy === true ? (
-                                            <Check className="size-4 text-green-600" />
+                                            <Check className="size-4 text-[#FF006F]" />
                                         ) : row.diy === false ? (
                                             <X className="size-4 text-red-600" />
                                         ) : (
@@ -103,7 +103,7 @@ export default function PricingComparator() {
                                     </td>
                                     <td>
                                         {row.freelancer === true ? (
-                                            <Check className="size-4 text-green-600" />
+                                            <Check className="size-4 text-[#FF006F]" />
                                         ) : row.freelancer === false ? (
                                             <X className="size-4 text-red-600" />
                                         ) : (

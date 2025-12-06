@@ -1,0 +1,27 @@
+{
+  "name": "Tasy - Instant Replace",
+  "short_name": "Tasy Instant Replace",
+  "description": "Create Instagram ready Stories - within seconds.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["productivity", "business", "social"],
+  "lang": "en-US",
+  "dir": "ltr"
+}
+

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    body {
+      width: 360px;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #191919;
+      color: #fff;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .header {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: #191919;
+      position: relative;
+    }
+    .settings-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .credits-display {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      font-weight: 500;
+      color: #fff;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      transition: background 0.2s;
+    }
+    .credits-display:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    .logo {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .content {
+      padding: 20px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .section {
+      margin-bottom: 24px;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .upload-area-small {
+      border: 2px dashed #2a2c2d;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #1d1f20;
+    }
+    .upload-area-small:hover {
+      border-color: #3a3c3d;
+      background: #252728;
+    }
+    .upload-area-small.has-file {
+      border-color: #4a4c4d;
+      background: #2a2c2d;
+    }
+    .upload-icon-small {
+      width: 20px;
+      height: 20px;
+      margin: 0 auto 4px;
+      opacity: 0.5;
+    }
+    .upload-text-small {
+      font-size: 11px;
+      color: #ccc;
+    }
+    .file-preview-small {
+      margin-top: 8px;
+      padding: 6px;
+      background: #1d1f20;
+      border-radius: 4px;
+      font-size: 10px;
+      color: #fff;
+    }
+    .file-preview-small img {
+      max-width: 100%;
+      max-height: 60px;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+    .secondary-images-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .logos-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .logo-item {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border: 2px dashed #2a2c2d;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #1d1f20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .logo-item:hover {
+      border-color: #3a3c3d;
+    }
+    .logo-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+    .logo-item .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .add-logo-btn {
+      width: 100%;
+      padding: 8px;
+      background: #1d1f20;
+      border: 2px dashed #2a2c2d;
+      border-radius: 6px;
+      color: #ccc;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .add-logo-btn:hover {
+      border-color: #3a3c3d;
+      background: #252728;
+    }
+    .secondary-image-item {
+      position: relative;
+      aspect-ratio: 1;
+      border: 2px dashed #2a2c2d;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      background: #1d1f20;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .secondary-image-item:hover {
+      border-color: #3a3c3d;
+    }
+    .secondary-image-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .secondary-image-item .remove-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      font-size: 12px;
+      line-height: 1;
+    }
+    .add-secondary-btn {
+      width: 100%;
+      padding: 8px;
+      background: #1d1f20;
+      border: 2px dashed #2a2c2d;
+      border-radius: 6px;
+      color: #ccc;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .add-secondary-btn:hover {
+      border-color: #3a3c3d;
+      background: #252728;
+    }
+    .color-picker-wrapper-small {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .color-input-small {
+      width: 40px;
+      height: 40px;
+      border: 2px solid #2a2c2d;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #1d1f20;
+      padding: 0;
+    }
+    .color-value-small {
+      flex: 1;
+      font-size: 11px;
+      color: #ccc;
+      font-family: monospace;
+    }
+    .generated-images-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    .generated-image-item {
+      position: relative;
+      border: 1px solid #2a2c2d;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #1d1f20;
+    }
+    .generated-image-item img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+    }
+    .download-btn {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .download-btn:hover {
+      border-color: rgba(255, 0, 111, 0.8);
+    }
+    .download-btn svg {
+      pointer-events: none;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .empty-state {
+      text-align: center;
+      padding: 20px;
+      color: #888;
+      font-size: 12px;
+    }
+    .hidden {
+      display: none;
+    }
+    .remove-btn {
+      margin-top: 8px;
+      padding: 4px 8px;
+      background: #ff4444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .remove-btn:hover {
+      background: #cc0000;
+    }
+    .content {
+      background: #191919;
+    }
+    /* Auth page styles */
+    .auth-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 20px;
+      min-height: 500px;
+      text-align: center;
+      background: #191919;
+    }
+    .auth-page.hidden {
+      display: none;
+    }
+    .auth-logo {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 32px;
+      border-radius: 12px;
+    }
+    .auth-title {
+      font-size: 30px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 48px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.2;
+    }
+    .auth-button {
+      width: 100%;
+      padding: 14px 24px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .auth-button:hover {
+      background: #f5f5f5;
+    }
+    .auth-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .auth-button svg {
+      width: 20px;
+      height: 20px;
+    }
+    .auth-divider {
+      position: relative;
+      margin: 24px 0;
+    }
+    .auth-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: #404040;
+    }
+    .auth-divider-text {
+      position: relative;
+      padding: 0 12px;
+      color: #888;
+      font-size: 14px;
+      background: #191919;
+    }
+    .auth-disclaimer {
+      margin-top: 48px;
+      font-size: 12px;
+      color: #999;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+    .auth-disclaimer a {
+      color: #fff;
+      text-decoration: underline;
+    }
+    .auth-disclaimer a:hover {
+      color: #fff;
+    }
+    .settings-content.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <!-- Auth Page (shown when not authenticated) -->
+  <div class="auth-page" id="authPage">
+    <img src="" alt="Tasy Icon" class="auth-logo" id="authLogo">
+    <h1 class="auth-title">Welcome to Tasy</h1>
+    <div style="width: 100%; max-width: 320px;">
+      <button class="auth-button" id="googleSignInBtn">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+      <div class="auth-divider">
+        <span class="auth-divider-text">Or</span>
+      </div>
+      <button class="auth-button" id="emailSignInBtn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        Continue with Email
+      </button>
+      <p class="auth-disclaimer">
+        By continuing, I acknowledge the <a href="https://app.tasy.ai/privacy-policy" target="_blank">Privacy Policy</a> and agree to the <a href="https://app.tasy.ai/terms-of-use" target="_blank">Terms of Use</a>. I also confirm that I am at least 18 years old.
+      </p>
+    </div>
+  </div>
+
+  <!-- Settings Content (shown when authenticated) -->
+  <div class="settings-content" id="settingsContent">
+  <div class="header">
+    <div class="settings-text">Settings</div>
+    <div class="credits-display" id="creditsDisplay">-- credits</div>
+      <img src="" alt="Tasy" class="logo" id="headerLogo">
+  </div>
+
+  <div class="content">
+    <!-- Logo Upload (for Pinterest) -->
+    <div class="section" id="logoSection" style="display: none;">
+      <div class="section-title">Logos</div>
+      <div id="logosContainer">
+        <div class="logos-grid" id="logosGrid"></div>
+        <button class="add-logo-btn" id="addLogoBtn">+ Add Logo</button>
+      </div>
+      <input type="file" id="logoInput" accept="image/*" class="hidden" multiple>
+    </div>
+
+    <!-- Product Upload (for Facebook) -->
+    <div class="section" id="productSection">
+      <div class="section-title">Product Image</div>
+      <div class="upload-area-small" id="productUpload">
+        <svg class="upload-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <div class="upload-text-small">Click to upload</div>
+        <input type="file" id="productInput" accept="image/*" class="hidden">
+        <div class="file-preview-small hidden" id="productPreview"></div>
+      </div>
+    </div>
+
+    <!-- Secondary Images (Up to 3) - Only for Facebook -->
+    <div class="section" id="secondarySection">
+      <div class="section-title">Secondary Images (up to 3)</div>
+      <div id="secondaryImagesContainer">
+        <div class="secondary-images-grid" id="secondaryImagesGrid"></div>
+        <button class="add-secondary-btn" id="addSecondaryBtn" style="display: none;">+ Add Image</button>
+      </div>
+      <input type="file" id="secondaryInput" accept="image/*" class="hidden" multiple>
+    </div>
+
+    <!-- Color Picker (Smaller) - Hidden on Pinterest -->
+    <div class="section" id="colorSection">
+      <div class="section-title">Accent Color</div>
+      <div class="color-picker-wrapper-small">
+        <input type="color" id="colorInput" class="color-input-small" value="#FF006F">
+        <div class="color-value-small" id="colorValue">#FF006F</div>
+      </div>
+    </div>
+
+    <!-- Generated Images -->
+    <div class="section">
+      <div class="section-title">Generated Images</div>
+      <div id="generatedImagesContainer">
+        <div class="empty-state" id="emptyGeneratedState">No generated images yet</div>
+        <div class="generated-images-grid" id="generatedImagesGrid"></div>
+      </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+

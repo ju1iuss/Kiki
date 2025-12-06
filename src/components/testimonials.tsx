@@ -12,37 +12,37 @@ const testimonials: Testimonial[] = [
     {
         name: 'Darius Göttert',
         role: 'Founder',
-        image: 'https://randomuser.me/api/portraits/men/1.jpg',
+        image: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=200&h=200&fit=crop&q=80',
         quote: 'Finally can test as many ad variants as we want without booking creators every time. Doubled our campaign performance.',
     },
     {
         name: 'Luis Reutner',
         role: 'Content Creator',
-        image: 'https://randomuser.me/api/portraits/men/2.jpg',
+        image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&h=200&fit=crop&q=80',
         quote: 'No more endless back-and-forth with video teams. We have full control and can react instantly.',
     },
     {
         name: 'Daniel Von Maydell',
         role: 'Social Media Agency',
-        image: 'https://randomuser.me/api/portraits/men/3.jpg',
+        image: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=200&h=200&fit=crop&q=80',
         quote: 'Our TikTok ads perform better than videos we used to pay €800 for. Wild.',
     },
     {
         name: 'Eric Jansen',
         role: 'Co-founder Social Media Agency',
-        image: 'https://randomuser.me/api/portraits/men/4.jpg',
+        image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&h=200&fit=crop&q=80',
         quote: 'As an online shop, we can now promote every new product with video content immediately. No more waiting.',
     },
     {
         name: 'Lorenz Kopp',
         role: 'Founder Recruiting Agency',
-        image: 'https://randomuser.me/api/portraits/men/5.jpg',
+        image: 'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=200&h=200&fit=crop&q=80',
         quote: 'Game changer for scaling. Managing multiple accounts at once now.',
     },
     {
         name: 'Tim Heissler',
         role: 'Head of E-Commerce',
-        image: 'https://randomuser.me/api/portraits/men/6.jpg',
+        image: 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&h=200&fit=crop&q=80',
         quote: 'Automation completely changed our content process. We can focus on what actually matters.',
     },
 ]

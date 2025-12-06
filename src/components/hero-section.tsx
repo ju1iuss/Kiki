@@ -174,7 +174,7 @@ export default function HeroSection() {
                                     preset="fade-in-blur"
                                     speedSegment={0.3}
                                     as="h1"
-                                    className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-medium md:text-6xl lg:mt-10 xl:text-7xl"
+                                    className="mx-auto mt-16 max-w-4xl text-balance text-4xl font-medium md:text-6xl lg:mt-24 xl:text-7xl"
                                     style={{ letterSpacing: '-0.05em' }}>
                                     {t('hero.title')}
                                 </TextEffect>

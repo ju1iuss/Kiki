@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tasy - Instant Replace
+
+> Create Instagram ready Stories - within seconds.
+
+## Overview
+
+Tasy - Instant Replace is a powerful tool that helps you create Instagram-ready Stories instantly. The platform includes a Chrome extension for adapting content from Facebook Ads Library and Pinterest, transforming them into personalized Instagram Stories within seconds.
+
+## Features
+
+### 🚀 Core Platform Features
+
+- **Instant Instagram Stories**: Create Instagram-ready Stories within seconds
+- **AI-Powered Content Creation**: Transform content using advanced AI models
+- **Chrome Extension**: Extract and adapt content from Facebook Ads Library and Pinterest
+- **Brand Customization**: Upload logos, set accent colors, and customize visuals
+- **Quick Export**: Generate multiple Story variations instantly
+
+## Tech Stack
+
+- **Frontend**: Next.js 16, React 19, TypeScript
+- **Styling**: Tailwind CSS 4, Radix UI
+- **Backend**: Supabase (PostgreSQL, Auth, Edge Functions)
+- **Payments**: Stripe (Embedded Checkout)
+- **AI**: Gemini 2, nanobanana-pro
+- **Deployment**: Vercel
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+ and npm 9+
+- Supabase account and project
+- Stripe account (for payments)
+- API keys for Gemini and FAL (for Chrome extension)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/tasy/tasy-instant-replace.git
+cd tasy-instant-replace
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Set up environment variables:
+```bash
+cp .env.example .env.local
+# Fill in your environment variables
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Run the development server:
+```bash
+npm run dev
+```
 
-## Learn More
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-To learn more about Next.js, take a look at the following resources:
+## Chrome Extension Setup
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+See the [Chrome Extension README](./chrome-extension/README.md) for detailed setup instructions.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+```
+tasy-instant-replace/
+├── chrome-extension/      # Chrome extension for ad adaptation
+├── src/
+│   ├── app/              # Next.js app router pages
+│   ├── components/       # React components
+│   └── lib/              # Utilities and helpers
+├── supabase/             # Supabase functions and migrations
+└── public/               # Static assets
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Required environment variables are documented in [ENVIRONMENT_VARIABLES.md](./ENVIRONMENT_VARIABLES.md).
+
+## Documentation
+
+- [Chrome Extension Setup](./chrome-extension/README.md)
+- [Stripe Integration Guide](./STRIPE_SETUP_GUIDE.md)
+- [Subscription System](./SUBSCRIPTION_SYSTEM.md)
+- [Deployment Guide](./DEPLOYMENT.md)
+
+## Contributing
+
+This is a private project. For questions or issues, please contact the Tasy team.
+
+## License
+
+UNLICENSED - Proprietary software
+
+## Links
+
+- **Web App**: [https://app.tasy.ai](https://app.tasy.ai)
+- **Main Site**: [https://tasy.ai](https://tasy.ai)
+- **Support**: Contact through the app dashboard
+
+---
+
+Built with ❤️ by Tasy

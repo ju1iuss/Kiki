@@ -24,14 +24,14 @@ export default function Pricing() {
                                 </span>
                                 <p className="text-muted-foreground text-sm">{t('pricing.perMonth')}</p>
 
-                                <div className="flex justify-center mt-8">
+                                {/* <div className="flex justify-center mt-8">
                                 <Button
                                     asChild
                                     size="lg"
                                     className="active:scale-95 transition-transform duration-150">
                                     <Link href="/apply">{t('pricing.cta')}</Link>
                                 </Button>
-                                </div>
+                                </div> */}
 
                                 <p className="text-muted-foreground mt-12 text-sm">{t('pricing.description')}</p>
                             </div>

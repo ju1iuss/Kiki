@@ -6,22 +6,13 @@ export const Logo = ({ className }: { className?: string; uniColor?: boolean }) 
         <div className={cn("flex items-center gap-2", className)}>
             <Image 
                 src="/favicon.ico" 
-                alt="Tasy Icon" 
-                width={32} 
-                height={32}
-                className="h-8 w-8"
+                alt="Tasy Logo" 
+                width={40} 
+                height={40}
+                className="h-10 w-10"
                 unoptimized
+                priority
             />
-            <span 
-                style={{
-                    fontFamily: 'system-ui, -apple-system, sans-serif',
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    letterSpacing: '-0.05em',
-                    color: '#000000'
-                }}>
-                Tasy
-            </span>
         </div>
     )
 }

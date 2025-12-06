@@ -1,0 +1,63 @@
+/* Styles for Tasy Chrome Extension */
+
+.tasy-replicate-btn {
+  transition: all 0.2s ease !important;
+}
+
+.tasy-replicate-btn:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.8) !important;
+}
+
+.tasy-replicate-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.tasy-copy-ad-btn {
+  transition: border-color 0.2s ease !important;
+  pointer-events: auto !important;
+  isolation: isolate !important;
+}
+
+.tasy-copy-ad-btn:hover {
+  border-color: rgba(255, 0, 111, 0.8) !important;
+}
+
+.tasy-copy-ad-btn:active {
+  border-color: rgba(255, 0, 111, 1) !important;
+}
+
+.tasy-copy-ad-btn svg,
+.tasy-copy-ad-btn span {
+  pointer-events: none !important;
+}
+
+#tasy-replicate-modal {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif !important;
+}
+
+#tasy-modal-close:hover {
+  background: #1d1f20 !important;
+  color: #fff !important;
+}
+
+.tasy-login-button:hover {
+  background: #f0f0f0 !important;
+}
+
+.tasy-replicate-panel {
+  animation: fadeIn 0.2s ease-in-out !important;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.tasy-ad-container {
+  position: relative !important;
+}
