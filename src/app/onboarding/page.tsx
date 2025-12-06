@@ -91,7 +91,7 @@ function OnboardingSteps() {
     checkAuth()
 
     // Listen for auth state changes (handles OAuth callback)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: string, session: any) => {
       if (event === 'SIGNED_IN' && session) {
         // Save onboarding images after signup
         await saveOnboardingImages()

@@ -3,9 +3,10 @@ import { createServerClient } from '@supabase/ssr'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -31,7 +32,7 @@ export async function POST(
     const { data: mockup } = await supabase
       .from('mockups')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (!mockup) {
@@ -43,7 +44,7 @@ export async function POST(
       .from('saved_mockups')
       .insert({
         user_id: user.id,
-        mockup_id: params.id,
+        mockup_id: id,
       })
       .select()
       .single()
@@ -69,9 +70,10 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -97,7 +99,7 @@ export async function DELETE(
       .from('saved_mockups')
       .delete()
       .eq('user_id', user.id)
-      .eq('mockup_id', params.id)
+      .eq('mockup_id', id)
 
     if (error) {
       console.error('Error unsaving mockup:', error)

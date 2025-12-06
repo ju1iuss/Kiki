@@ -3,9 +3,10 @@ import { createServerClient } from '@supabase/ssr'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -30,7 +31,7 @@ export async function GET(
     const { data: mockup, error } = await supabase
       .from('mockups')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error) {
@@ -47,7 +48,7 @@ export async function GET(
       .from('saved_mockups')
       .select('id')
       .eq('user_id', user.id)
-      .eq('mockup_id', params.id)
+      .eq('mockup_id', id)
       .single()
 
     return NextResponse.json({
@@ -67,9 +68,10 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -94,8 +96,8 @@ export async function PATCH(
     // Verify ownership
     const { data: existingMockup } = await supabase
       .from('mockups')
-      .select('user_id')
-      .eq('id', params.id)
+      .select('user_id, aesthetic_vibe, platform')
+      .eq('id', id)
       .single()
 
     if (!existingMockup || existingMockup.user_id !== user.id) {
@@ -116,7 +118,7 @@ export async function PATCH(
 
       return NextResponse.json({
         mockups: mockImageUrls.map((url, index) => ({
-          id: `${params.id}-new-${index}`,
+          id: `${id}-new-${index}`,
           title: `Variation ${index + 1}`,
           image_urls: [url],
           aesthetic_vibe: existingMockup.aesthetic_vibe,
@@ -129,7 +131,7 @@ export async function PATCH(
     const { data: mockup, error } = await supabase
       .from('mockups')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 
@@ -150,9 +152,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -178,7 +181,7 @@ export async function DELETE(
     const { data: existingMockup } = await supabase
       .from('mockups')
       .select('user_id')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (!existingMockup || existingMockup.user_id !== user.id) {
@@ -188,7 +191,7 @@ export async function DELETE(
     const { error } = await supabase
       .from('mockups')
       .delete()
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (error) {
       console.error('Error deleting mockup:', error)

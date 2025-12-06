@@ -49,7 +49,7 @@ export function AuthSync() {
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: string, session: any) => {
         if (session) {
           const storageData = {
             access_token: session.access_token,

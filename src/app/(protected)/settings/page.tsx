@@ -289,8 +289,6 @@ export default function SettingsPage() {
       }
     }
     
-    setShowCheckout(false)
-    setClientSecret(null)
     setSelectedPlan(null)
     
     router.push('/subscription/success?plan=' + selectedPlan)

@@ -28,7 +28,7 @@ export default function ProtectedLayout({
 
     // Set up auth state listener
     const supabase = getClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
       if (event === 'SIGNED_OUT') {
         router.push('/sign-in')
       }

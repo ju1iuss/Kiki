@@ -3,6 +3,8 @@
 import React from 'react'
 import { MockupCard, type Mockup } from './mockup-card'
 
+export type { Mockup }
+
 interface MockupGridProps {
   mockups: Mockup[]
   onSave?: (mockupId: string) => void

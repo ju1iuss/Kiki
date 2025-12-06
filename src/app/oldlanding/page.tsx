@@ -5,7 +5,7 @@ import Features from "@/components/features-4";
 import Features6 from "@/components/features-6";
 import Pricing from "@/components/pricing";
 import FAQsThree from "@/components/faqs-3";
-import FooterSection from "@/components/footer";
+import { Footer } from "@/components/footer";
 
 export default function Home() {
   return (
@@ -17,7 +17,7 @@ export default function Home() {
       <PricingComparator />
       <Pricing />
       <FAQsThree />
-      <FooterSection />
+      <Footer />
     </>
   );
 }

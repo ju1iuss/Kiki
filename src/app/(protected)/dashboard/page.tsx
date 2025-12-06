@@ -48,7 +48,7 @@ export default function DashboardPage() {
 
         // Extract all images from all mockups
         const allImages: UserImage[] = []
-        mockups?.forEach((mockup) => {
+        mockups?.forEach((mockup: any) => {
           // Handle image_urls as JSONB array - could be array or null
           let imageUrls: string[] = []
           if (mockup.image_urls) {
@@ -176,7 +176,7 @@ export default function DashboardPage() {
       const updatePromises: Promise<any>[] = []
 
       for (const [mockupId, selectedImgs] of imagesByMockup.entries()) {
-        const mockup = mockups?.find(m => m.id === mockupId)
+        const mockup = mockups?.find((m: any) => m.id === mockupId)
         if (!mockup) continue
 
         const imageUrls = Array.isArray(mockup.image_urls) ? mockup.image_urls : []
@@ -213,7 +213,7 @@ export default function DashboardPage() {
 
         if (updatedMockups) {
           const allImages: UserImage[] = []
-          updatedMockups.forEach((mockup) => {
+          updatedMockups.forEach((mockup: any) => {
             let imageUrls: string[] = []
             if (mockup.image_urls) {
               if (Array.isArray(mockup.image_urls)) {
