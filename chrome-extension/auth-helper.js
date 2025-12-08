@@ -1,8 +1,8 @@
 // Auth helper content script - injected into tasy.ai and app.tasy.ai pages to get session token
 
 (function() {
-  // Check if we're on a tasy.ai or app.tasy.ai page
-  if (!window.location.hostname.includes('tasy.ai')) {
+  // Check if we're on a tasy.ai, app.tasy.ai, or localhost page
+  if (!window.location.hostname.includes('tasy.ai') && window.location.hostname !== 'localhost') {
     return;
   }
 
@@ -11,30 +11,64 @@
   // Function to get session token from Supabase
   async function getSessionToken() {
     try {
-      // Try to access Supabase client from the page
-      // The page should have initialized Supabase client
-      const cookies = document.cookie.split(';');
-      console.log('[Tasy Extension Auth Helper] Cookies:', cookies.length);
+      console.log('[Tasy Extension Auth Helper] Getting session token...');
       
-      // Try to get session from localStorage
+      // Method 1: Try to get session from localStorage (Supabase @supabase/ssr format)
       const keys = Object.keys(localStorage);
+      console.log('[Tasy Extension Auth Helper] Total localStorage keys:', keys.length);
+      
       const supabaseKeys = keys.filter(k => k.includes('supabase') || k.includes('sb-'));
       console.log('[Tasy Extension Auth Helper] Supabase localStorage keys:', supabaseKeys);
       
       for (const key of supabaseKeys) {
         const value = localStorage.getItem(key);
+        console.log('[Tasy Extension Auth Helper] Checking key:', key);
         try {
           const parsed = JSON.parse(value);
-          if (parsed && (parsed.access_token || parsed.session?.access_token)) {
-            const token = parsed.access_token || parsed.session?.access_token;
-            console.log('[Tasy Extension Auth Helper] Found token in localStorage');
-            return token;
+          // Check for access_token at various levels
+          if (parsed && typeof parsed === 'object') {
+            // Direct access_token
+            if (parsed.access_token) {
+              console.log('[Tasy Extension Auth Helper] Found token at root level');
+              return parsed.access_token;
+            }
+            // Nested in session
+            if (parsed.session && parsed.session.access_token) {
+              console.log('[Tasy Extension Auth Helper] Found token in session');
+              return parsed.session.access_token;
+            }
+            // Check for currentSession in PKCE format
+            if (parsed.currentSession && parsed.currentSession.access_token) {
+              console.log('[Tasy Extension Auth Helper] Found token in currentSession');
+              return parsed.currentSession.access_token;
+            }
           }
         } catch (e) {
-          // Not JSON or doesn't have token
+          console.log('[Tasy Extension Auth Helper] Failed to parse key:', key, e);
         }
       }
       
+      // Method 2: Try cookies as fallback
+      const cookies = document.cookie.split(';').map(c => c.trim());
+      console.log('[Tasy Extension Auth Helper] Checking', cookies.length, 'cookies');
+      
+      for (const cookie of cookies) {
+        if (cookie.startsWith('sb-') && cookie.includes('-auth-token')) {
+          try {
+            const [, value] = cookie.split('=');
+            const decoded = decodeURIComponent(value);
+            const parsed = JSON.parse(decoded);
+            if (parsed.access_token) {
+              console.log('[Tasy Extension Auth Helper] Found token in cookie');
+              return parsed.access_token;
+            }
+          } catch (e) {
+            console.log('[Tasy Extension Auth Helper] Failed to parse cookie:', e);
+          }
+        }
+      }
+      
+      console.log('[Tasy Extension Auth Helper] No token found');
       return null;
     } catch (error) {
       console.error('[Tasy Extension Auth Helper] Error getting session:', error);

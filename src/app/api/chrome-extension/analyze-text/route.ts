@@ -93,6 +93,7 @@ export async function POST(request: NextRequest) {
         method: 'POST',
         headers: {
           'Authorization': authHeader,
+          'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ imageUrl }),

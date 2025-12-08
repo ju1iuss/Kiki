@@ -18,7 +18,8 @@
     "https://www.pinterest.com/*",
     "https://*.pinterest.com/*",
     "https://tasy.ai/*",
-    "https://*.tasy.ai/*"
+    "https://*.tasy.ai/*",
+    "http://localhost:3000/*"
   ],
   "content_scripts": [
     {
@@ -42,7 +43,8 @@
     {
       "matches": [
         "https://tasy.ai/*",
-        "https://*.tasy.ai/*"
+        "https://*.tasy.ai/*",
+        "http://localhost:3000/*"
       ],
       "js": ["auth-helper.js"],
       "run_at": "document_start"

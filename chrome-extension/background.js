@@ -95,7 +95,8 @@ async function refreshSessionToken() {
       const cookies2 = await chrome.cookies.getAll({ domain: 'tasy.ai' });
       const cookies3 = await chrome.cookies.getAll({ domain: 'app.tasy.ai' });
       const cookies4 = await chrome.cookies.getAll({ domain: 'www.tasy.ai' });
-      const allCookies = [...cookies1, ...cookies2, ...cookies3, ...cookies4];
+      const cookies5 = await chrome.cookies.getAll({ domain: 'localhost' });
+      const allCookies = [...cookies1, ...cookies2, ...cookies3, ...cookies4, ...cookies5];
       
       console.log('[Tasy Extension Background] Found', allCookies.length, 'cookies');
       console.log('[Tasy Extension Background] Cookie names:', allCookies.map(c => c.name));

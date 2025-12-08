@@ -82,6 +82,7 @@ export async function GET(request: NextRequest) {
         method: 'GET',
         headers: {
           'Authorization': authHeader,
+          'apikey': process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
           'Content-Type': 'application/json',
         },
       }
