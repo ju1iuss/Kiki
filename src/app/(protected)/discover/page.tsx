@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from 'react'
 import { ArrowLeft } from 'lucide-react'
-import { ImageGrid } from '@/components/image-grid'
 import { useRouter } from 'next/navigation'
 
 interface Collection {
@@ -86,20 +85,21 @@ export default function DiscoverPage() {
             </p>
           </div>
 
-          <div className="space-y-0">
-            {/* Group images into sets of 4 */}
-            {Array.from({ length: Math.ceil(selectedCollection.images.length / 4) }).map((_, groupIndex) => {
-              const groupImages = selectedCollection.images.slice(groupIndex * 4, (groupIndex + 1) * 4)
-              return (
-                <ImageGrid
-                  key={groupIndex}
-                  images={groupImages}
-                  className="w-full"
-                  onImageClick={handleReplicate}
-                  showReplicateButton={true}
+          <div className="grid grid-cols-4 gap-0">
+            {selectedCollection.images.map((image, index) => (
+              <div
+                key={index}
+                onClick={() => handleReplicate(image)}
+                className="group relative border-r border-b border-white/10 last:border-r-0 overflow-hidden bg-gray-800 cursor-pointer hover:opacity-90 transition-opacity"
+                style={{ aspectRatio: '1/1' }}
+              >
+                <img
+                  src={image}
+                  alt={`Collection image ${index + 1}`}
+                  className="w-full h-full object-cover"
                 />
-              )
-            })}
+              </div>
+            ))}
           </div>
         </div>
     )

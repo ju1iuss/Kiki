@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Schibsted_Grotesk, Merriweather } from "next/font/google";
 import localFont from "next/font/local";
+import { ClerkProvider } from '@clerk/nextjs';
+import { dark } from '@clerk/themes';
 import "./globals.css";
 import { LanguageWrapper } from "@/components/language-wrapper";
 import { AuthSync } from "@/components/auth-sync";
-import { LoadingScreen } from "@/components/loading-screen";
 
 const marlinsoft = localFont({
   src: "../../public/fonts/marlinsoft.otf",
@@ -99,16 +100,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full dark">
-      <body
-        className={`${marlinsoft.variable} font-sans antialiased m-0 p-0 h-full`}
-      >
-        <LoadingScreen />
-        <AuthSync />
-        <LanguageWrapper>
-          {children}
-        </LanguageWrapper>
-      </body>
-    </html>
+    <ClerkProvider appearance={{ baseTheme: dark }}>
+      <html lang="de" className="h-full dark">
+        <body
+          className={`${marlinsoft.variable} font-sans antialiased m-0 p-0 h-full`}
+        >
+          <AuthSync />
+          <LanguageWrapper>
+            {children}
+          </LanguageWrapper>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

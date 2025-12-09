@@ -1,43 +1,32 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { getClient } from '@/lib/supabase/client'
+import { useAuth } from '@clerk/nextjs'
 import { AppLayout } from '@/components/app-layout'
+import { useEffect } from 'react'
 
 export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { isSignedIn, isLoaded } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const supabase = getClient()
-      const { data: { user }, error } = await supabase.auth.getUser()
-      
-      if (error || !user) {
-        console.log('User not authenticated, redirecting to sign-in')
-        router.push(`/sign-in?redirect=${pathname}`)
-      }
+    if (isLoaded && !isSignedIn) {
+      router.push(`/sign-in?redirect=${pathname}`)
     }
+  }, [isLoaded, isSignedIn, router, pathname])
 
-    checkAuth()
+  if (!isLoaded) {
+    return null
+  }
 
-    // Set up auth state listener
-    const supabase = getClient()
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
-      if (event === 'SIGNED_OUT') {
-        router.push('/sign-in')
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [router, pathname])
+  if (!isSignedIn) {
+    return null
+  }
 
   return <AppLayout>{children}</AppLayout>
 }

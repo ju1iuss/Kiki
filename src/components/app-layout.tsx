@@ -17,7 +17,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         <Sidebar />
         <main className="flex-1 h-full overflow-y-auto">
           <div className="flex justify-center items-start h-full">
-            <div style={{ maxWidth: '700px', width: '100%' }} className="py-8">
+            <div style={{ maxWidth: '700px', width: '100%' }} className="py-8 pb-28 lg:pb-8">
               {children}
             </div>
           </div>
