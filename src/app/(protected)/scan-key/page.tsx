@@ -22,8 +22,8 @@ interface MatchResult {
   key_id: string
   title: string
   similarity: number
-  matched_features: string[]
-  analysis: any
+  reason: string
+  description: string
   image_url?: string | null
 }
 
@@ -405,32 +405,36 @@ export default function ScanKeyPage() {
                       {/* Match Image */}
                       <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-white/10 bg-white/5 relative group">
                         {match.image_url ? (
-                          <>
-                            <img
-                              src={match.image_url}
-                              alt={match.title}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                console.error('Image failed to load:', match.image_url)
-                                setImageErrors(prev => new Set(prev).add(match.key_id))
-                              }}
-                            />
-                            {/* URL tooltip on hover */}
-                            <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1">
-                              <div className="text-[8px] text-white/80 text-center break-all leading-tight font-mono">
-                                {match.image_url}
-                              </div>
-                            </div>
-                            {/* Show URL if image failed */}
-                            {imageErrors.has(match.key_id) && (
-                              <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-1">
-                                <Camera className="w-6 h-6 text-white/30 mb-1" />
-                                <div className="text-[7px] text-white/60 text-center break-all leading-tight font-mono">
+                          !imageErrors.has(match.key_id) ? (
+                            <>
+                              <img
+                                src={match.image_url}
+                                alt={match.title}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                                onError={(e) => {
+                                  console.error('Image failed to load:', match.image_url)
+                                  setImageErrors(prev => new Set(prev).add(match.key_id))
+                                }}
+                                onLoad={() => {
+                                  console.log('Image loaded successfully:', match.image_url)
+                                }}
+                              />
+                              {/* URL tooltip on hover */}
+                              <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1 z-10 pointer-events-none">
+                                <div className="text-[8px] text-white/80 text-center break-all leading-tight font-mono">
                                   {match.image_url}
                                 </div>
                               </div>
-                            )}
-                          </>
+                            </>
+                          ) : (
+                            <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-1 z-10">
+                              <Camera className="w-6 h-6 text-white/30 mb-1" />
+                              <div className="text-[7px] text-white/60 text-center break-all leading-tight font-mono">
+                                Failed to load
+                              </div>
+                            </div>
+                          )
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <Camera className="w-8 h-8 text-white/30" />
@@ -471,28 +475,21 @@ export default function ScanKeyPage() {
                           </div>
                         </div>
 
-                        {/* Matched Features */}
-                        {match.matched_features && match.matched_features.length > 0 && (
+                        {/* Match Reason */}
+                        {match.reason && (
                           <div className="mb-3">
-                            <p className="text-xs text-gray-400 mb-1">Matched Features:</p>
-                            <div className="flex flex-wrap gap-1">
-                              {match.matched_features.map((feature, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-2 py-0.5 bg-[#FF006F]/20 text-[#FF006F] rounded text-xs"
-                                >
-                                  {feature}
-                                </span>
-                              ))}
-                            </div>
+                            <p className="text-xs text-gray-400 mb-1">Match Reason:</p>
+                            <p className="text-sm text-gray-300">
+                              {match.reason}
+                            </p>
                           </div>
                         )}
 
                         {/* Description and Action Button */}
                         <div className="flex items-start justify-between gap-3">
-                          {match.analysis?.description_summary && (
+                          {match.description && (
                             <p className="text-sm text-gray-400 flex-1 line-clamp-2">
-                              {match.analysis.description_summary}
+                              {match.description}
                             </p>
                           )}
                           <button

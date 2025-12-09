@@ -124,49 +124,15 @@ export default function AddKeyPage() {
         imageUrl = uploadData.url
       }
 
-      // Analyze the key using the edge function (use the uploaded URL instead of base64)
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zcftkbpfekuvatkiiujq.supabase.co'
-      const analyzeResponse = await fetch(`${supabaseUrl}/functions/v1/key`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`,
-        },
-        body: JSON.stringify({
-          mode: 'analyze',
-          image: imageUrl, // Use the uploaded URL instead of base64
-        }),
-      })
-
-      let keyDescription: string | null = null
-      if (analyzeResponse.ok) {
-        try {
-          const analyzeData = await analyzeResponse.json()
-          if (analyzeData.success && analyzeData.description) {
-            // The edge function returns description as JSON.stringify(analysis)
-            keyDescription = analyzeData.description
-            console.log('Key analysis successful, description saved')
-          } else {
-            console.warn('Key analysis response missing description:', analyzeData)
-          }
-        } catch (parseError) {
-          console.error('Error parsing analysis response:', parseError)
-        }
-      } else {
-        const errorText = await analyzeResponse.text()
-        console.warn('Key analysis failed:', analyzeResponse.status, errorText)
-      }
-
       // Generate a key from the image URL or create a unique key
       const keyValue = imageUrl
 
       // AI analysis goes in description (JSON string), manual description goes in custom_description
       // If no AI analysis, use tags as fallback for description
-      const finalDescription = keyDescription || 
-        (tags.length > 0 ? tags.join(', ') : null)
+      const initialDescription = tags.length > 0 ? tags.join(', ') : null
       const customDescription = description.trim() || null
 
-      // Save the key to the database
+      // OPTIMISTIC SAVE: Save the key immediately without waiting for AI analysis
       const saveResponse = await fetch('/api/keys', {
         method: 'POST',
         headers: {
@@ -175,7 +141,7 @@ export default function AddKeyPage() {
         body: JSON.stringify({
           key: keyValue,
           title: keyName.trim(),
-          description: finalDescription,
+          description: initialDescription,
           custom_description: customDescription,
           image_url: imageUrl,
         }),
@@ -186,12 +152,54 @@ export default function AddKeyPage() {
         throw new Error(errorData.error || 'Failed to save key')
       }
 
-      // Success - redirect to dashboard
+      const savedKeyData = await saveResponse.json()
+      const savedKeyId = savedKeyData.key?.id
+
+      // Success - redirect to dashboard immediately (optimistic)
       router.push('/dashboard')
+
+      // Update with AI analysis in the background (fire and forget)
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zcftkbpfekuvatkiiujq.supabase.co'
+      fetch(`${supabaseUrl}/functions/v1/key`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''}`,
+        },
+        body: JSON.stringify({
+          mode: 'analyze',
+          image: imageUrl,
+        }),
+      })
+        .then(async (analyzeResponse) => {
+          if (analyzeResponse.ok) {
+            try {
+              const analyzeData = await analyzeResponse.json()
+              if (analyzeData.success && analyzeData.description && savedKeyId) {
+                // Update the key with AI analysis in the background
+                await fetch(`/api/keys/${savedKeyId}`, {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    description: analyzeData.description,
+                  }),
+                })
+                console.log('Key analysis updated successfully in background')
+              }
+            } catch (parseError) {
+              console.error('Error parsing analysis response:', parseError)
+            }
+          }
+        })
+        .catch((error) => {
+          console.error('Background AI analysis failed:', error)
+          // Silently fail - key is already saved
+        })
     } catch (error) {
       console.error('Error adding key:', error)
       alert(error instanceof Error ? error.message : 'Failed to add key. Please try again.')
-    } finally {
       setLoading(false)
     }
   }
