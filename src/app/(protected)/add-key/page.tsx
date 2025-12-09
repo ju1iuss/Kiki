@@ -21,7 +21,7 @@ export default function AddKeyPage() {
   const [newTagInput, setNewTagInput] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const commonTags = ['Work', 'Personal', 'API', 'Production', 'Development', 'Test', 'Staging']
+  const commonTags = ['Arbeit', 'Privat', 'API', 'Produktion', 'Entwicklung', 'Test', 'Staging']
 
   // Check for pending image from camera (stored in sessionStorage)
   useEffect(() => {
@@ -160,10 +160,11 @@ export default function AddKeyPage() {
       // Generate a key from the image URL or create a unique key
       const keyValue = imageUrl
 
-      // Prioritize OpenAI description, then tags, then manual description
-      // OpenAI description is a JSON string with full analysis
+      // AI analysis goes in description (JSON string), manual description goes in custom_description
+      // If no AI analysis, use tags as fallback for description
       const finalDescription = keyDescription || 
-        (tags.length > 0 ? tags.join(', ') : (description.trim() || null))
+        (tags.length > 0 ? tags.join(', ') : null)
+      const customDescription = description.trim() || null
 
       // Save the key to the database
       const saveResponse = await fetch('/api/keys', {
@@ -175,6 +176,7 @@ export default function AddKeyPage() {
           key: keyValue,
           title: keyName.trim(),
           description: finalDescription,
+          custom_description: customDescription,
           image_url: imageUrl,
         }),
       })
@@ -228,6 +230,20 @@ export default function AddKeyPage() {
               placeholder="z.B. Stripe API Key"
               className="w-full h-12 bg-[#191919] border-white/10 text-white placeholder:text-gray-500 focus:border-[#FF006F] rounded-xl text-base"
               autoFocus
+            />
+          </div>
+
+          {/* Description Input */}
+          <div>
+            <label className="text-sm font-medium text-gray-300 mb-2 block">
+              Beschreibung <span className="text-gray-500 text-xs">(optional)</span>
+            </label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Füge eine Beschreibung hinzu..."
+              className="w-full min-h-[100px] p-3 bg-[#191919] border border-white/10 text-white rounded-xl resize-y placeholder:text-gray-500 focus:outline-none focus:border-[#FF006F] text-base"
+              rows={3}
             />
           </div>
 
@@ -305,15 +321,7 @@ export default function AddKeyPage() {
           <div className="flex gap-3 pt-4">
             <Button
               onClick={() => {
-                setShowQuickAdd(false)
-                setImageFile(null)
-                setImagePreview('')
-                setKeyName('')
-                setTags([])
-                setNewTagInput('')
-                if (fileInputRef.current) {
-                  fileInputRef.current.value = ''
-                }
+                router.push('/dashboard')
               }}
               className="flex-1 bg-white/10 text-white hover:bg-white/20 border border-white/20"
             >

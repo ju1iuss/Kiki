@@ -7,6 +7,7 @@ import { useUser } from '@clerk/nextjs'
 import { Plus, Settings, LayoutDashboard, ScanLine } from 'lucide-react'
 import Image from 'next/image'
 import { KeyCamera } from './key-camera'
+import { useKeyDetail } from '@/contexts/key-detail-context'
 
 interface SidebarProps {
   className?: string
@@ -17,12 +18,13 @@ export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
   const [, startTransition] = useTransition()
   const { user } = useUser()
+  const { isViewingKeyDetails } = useKeyDetail()
   const [showCamera, setShowCamera] = useState(false)
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/add-key', label: 'Add Key', icon: Plus },
-    { href: '/settings', label: 'Settings', icon: Settings },
+    { href: '/add-key', label: 'Schlüssel hinzufügen', icon: Plus },
+    { href: '/settings', label: 'Einstellungen', icon: Settings },
   ]
 
   const isActive = (href: string) => pathname === href
@@ -101,36 +103,32 @@ export function Sidebar({ className }: SidebarProps) {
     )
   }
 
-  const handleCameraCapture = async (imageData: string) => {
-    try {
-      // Upload image immediately to avoid URL length issues
-      const uploadResponse = await fetch('/api/upload-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          imageData: imageData,
-          fileName: 'camera-capture.jpg',
-        }),
-      })
+  const handleCameraCapture = async (imageData: string): Promise<void> => {
+    // Upload image immediately to avoid URL length issues
+    const uploadResponse = await fetch('/api/upload-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imageData: imageData,
+        fileName: 'camera-capture.jpg',
+      }),
+    })
 
-      if (!uploadResponse.ok) {
-        const errorData = await uploadResponse.json().catch(() => ({ error: 'Unknown error' }))
-        throw new Error(errorData.error || `Upload failed with status ${uploadResponse.status}`)
-      }
-
-      const uploadData = await uploadResponse.json()
-      
-      // Store the uploaded URL in sessionStorage
-      sessionStorage.setItem('pendingKeyImage', uploadData.url)
-      
-      // Navigate to add-key page (will read from sessionStorage)
-      router.push('/add-key')
-      setShowCamera(false)
-    } catch (error) {
-      console.error('Error uploading camera image:', error)
-      alert('Failed to upload image. Please try again.')
-      setShowCamera(false)
+    if (!uploadResponse.ok) {
+      const errorData = await uploadResponse.json().catch(() => ({ error: 'Unknown error' }))
+      throw new Error(errorData.error || `Upload failed with status ${uploadResponse.status}`)
     }
+
+    const uploadData = await uploadResponse.json()
+    
+    // Store the uploaded URL in sessionStorage
+    sessionStorage.setItem('pendingKeyImage', uploadData.url)
+    
+    // Navigate immediately - camera will close automatically when component unmounts
+    router.push('/add-key')
+    
+    // Close camera after navigation starts
+    setShowCamera(false)
   }
 
   const handleAddKeyClick = (e: React.MouseEvent) => {
@@ -144,6 +142,9 @@ export function Sidebar({ className }: SidebarProps) {
   const handleScanKeyClick = () => {
     router.push('/scan-key')
   }
+
+  // Only show bottom nav on dashboard and settings pages, but not when viewing key details
+  const showBottomNav = (pathname === '/dashboard' || pathname === '/settings') && !isViewingKeyDetails
 
   return (
     <>
@@ -159,6 +160,7 @@ export function Sidebar({ className }: SidebarProps) {
       </aside>
 
       {/* Mobile Bottom Navigation - Floating Cloud */}
+      {showBottomNav && (
       <nav className="lg:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-fit max-w-[500px]">
         <div className="bg-[#191919] border border-white/10 rounded-full shadow-2xl backdrop-blur-xl">
           <div className="flex items-center justify-center gap-8 px-6 py-4">
@@ -215,6 +217,7 @@ export function Sidebar({ className }: SidebarProps) {
           </div>
         </div>
       </nav>
+      )}
 
       {/* Mobile Camera Modal */}
       {showCamera && (

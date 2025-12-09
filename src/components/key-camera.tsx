@@ -5,7 +5,7 @@ import { Camera, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface KeyCameraProps {
-  onCapture: (imageData: string) => void
+  onCapture: (imageData: string) => Promise<void>
   onClose: () => void
 }
 
@@ -89,17 +89,45 @@ export function KeyCamera({ onCapture, onClose }: KeyCameraProps) {
       // Convert to base64 image
       const imageData = canvas.toDataURL('image/jpeg', 0.9)
 
-      // Stop camera stream
+      // Stop camera stream immediately after capture
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop())
       }
 
-      setIsCapturing(false)
-      onCapture(imageData)
+      // Call onCapture - it will handle upload and navigation
+      // Keep isCapturing true to show loading state
+      await onCapture(imageData)
+      // If successful, onCapture will handle closing the camera
     } catch (error) {
       console.error('Error capturing photo:', error)
       setIsCapturing(false)
-      setError('Failed to capture photo. Please try again.')
+      
+      // Show error message
+      const errorMessage = error instanceof Error ? error.message : 'Failed to capture photo. Please try again.'
+      setError(errorMessage)
+      
+      // Restart camera stream for retry after a short delay
+      setTimeout(async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'environment',
+              width: { ideal: 1920 },
+              height: { ideal: 1080 },
+            },
+            audio: false,
+          })
+          streamRef.current = stream
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream
+            videoRef.current.play().catch(() => {})
+          }
+          // Clear error after restarting camera
+          setError(null)
+        } catch (restartError) {
+          console.error('Error restarting camera:', restartError)
+        }
+      }, 1000)
     }
   }
 
@@ -159,24 +187,35 @@ export function KeyCamera({ onCapture, onClose }: KeyCameraProps) {
       {/* Controls */}
       <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 bg-gradient-to-t from-black/80 to-transparent">
         <div className="flex items-center justify-center gap-4 max-w-[900px] mx-auto">
-          <Button
-            onClick={handleClose}
-            variant="outline"
-            className="border-white/20 text-white hover:bg-white/10"
-            size="icon"
-          >
-            <X className="w-5 h-5" />
-          </Button>
+          {!isCapturing && (
+            <Button
+              onClick={handleClose}
+              variant="outline"
+              className="border-white/20 text-white hover:bg-white/10"
+              size="icon"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          )}
 
-          <Button
-            onClick={capturePhoto}
-            disabled={isCapturing}
-            className="w-16 h-16 rounded-full bg-white hover:bg-gray-200 border-4 border-gray-300 shadow-lg disabled:opacity-50"
-          >
-            <Camera className="w-8 h-8 text-black" />
-          </Button>
+          {isCapturing ? (
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center border-4 border-white/30">
+                <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+              <p className="text-white text-sm">Wird hochgeladen...</p>
+            </div>
+          ) : (
+            <Button
+              onClick={capturePhoto}
+              disabled={isCapturing}
+              className="w-16 h-16 rounded-full bg-white hover:bg-gray-200 border-4 border-gray-300 shadow-lg disabled:opacity-50"
+            >
+              <Camera className="w-8 h-8 text-black" />
+            </Button>
+          )}
 
-          <div className="w-10" /> {/* Spacer for symmetry */}
+          {!isCapturing && <div className="w-10" />} {/* Spacer for symmetry */}
         </div>
       </div>
     </div>

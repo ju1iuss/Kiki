@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Camera, X, RotateCcw, Tag, Plus, Save, Sparkles } from 'lucide-react'
+import { Camera, X, RotateCcw, Tag, Plus, Save, Sparkles, ChevronRight, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Copy, Check } from 'lucide-react'
@@ -27,7 +27,7 @@ interface MatchResult {
   image_url?: string | null
 }
 
-const commonTags = ['Work', 'Personal', 'API', 'Production', 'Development', 'Test', 'Staging']
+const commonTags = ['Arbeit', 'Privat', 'API', 'Produktion', 'Entwicklung', 'Test', 'Staging']
 
 export default function ScanKeyPage() {
   const router = useRouter()
@@ -40,12 +40,16 @@ export default function ScanKeyPage() {
   const [isScanning, setIsScanning] = useState(false)
   const [scanStep, setScanStep] = useState(0)
   const [scanResult, setScanResult] = useState<{ matched: boolean; matches?: MatchResult[]; imageData?: string } | null>(null)
+  const [capturedImageData, setCapturedImageData] = useState<string | null>(null)
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAddName, setQuickAddName] = useState('')
   const [quickAddTags, setQuickAddTags] = useState<string[]>([])
   const [newTagInput, setNewTagInput] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+  const [showMatchAnimation, setShowMatchAnimation] = useState(false)
+  const [clickedButtonId, setClickedButtonId] = useState<string | null>(null)
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     const startCamera = async () => {
@@ -122,11 +126,21 @@ export default function ScanKeyPage() {
       setIsCapturing(false)
       setIsScanning(true)
       setScanStep(0)
+      setCapturedImageData(imageData) // Store image for display in step loader
+
+      // Auto-progress through 5 steps in 20 seconds (4 seconds per step)
+      const stepDuration = 4000 // 4 seconds per step
+      
+      // Progress through steps automatically
+      setScanStep(1)
+      setTimeout(() => setScanStep(2), stepDuration)
+      setTimeout(() => setScanStep(3), stepDuration * 2)
+      setTimeout(() => setScanStep(4), stepDuration * 3)
+      setTimeout(() => setScanStep(5), stepDuration * 4)
 
       try {
-        // Step 1: Upload image
-        setScanStep(1)
-        const uploadResponse = await fetch('/api/upload-image', {
+        // Start backend operations in parallel
+        const uploadPromise = fetch('/api/upload-image', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -135,6 +149,12 @@ export default function ScanKeyPage() {
           }),
         })
 
+        // Wait for 20 seconds total (ensuring UI completes all steps)
+        await new Promise(resolve => setTimeout(resolve, 20000))
+
+        // Now process the results
+        const uploadResponse = await uploadPromise
+
         if (!uploadResponse.ok) {
           const errorData = await uploadResponse.json().catch(() => ({ error: 'Unknown error' }))
           throw new Error(errorData.error || 'Failed to upload image')
@@ -142,9 +162,6 @@ export default function ScanKeyPage() {
 
         const uploadData = await uploadResponse.json()
         const imageUrl = uploadData.url
-
-        // Step 2: Analyze key
-        setScanStep(2)
         
         // Call the edge function to analyze and match the key
         const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zcftkbpfekuvatkiiujq.supabase.co'
@@ -160,38 +177,40 @@ export default function ScanKeyPage() {
             clerk_user_id: user?.id,
           }),
         })
-
-        if (!matchResponse.ok) {
-          const errorText = await matchResponse.text()
-          throw new Error(`Failed to analyze key: ${errorText}`)
-        }
-
-        // Step 3: Compare with existing keys
-        setScanStep(3)
         
-        const matchData = await matchResponse.json()
-        
-        // Step 4: Finalize results
-        setScanStep(4)
-        await new Promise(resolve => setTimeout(resolve, 500)) // Small delay for UX
-        
-        if (matchData.success && matchData.matches && matchData.matches.length > 0) {
-          // Show all matches with probabilities
-          setScanResult({ 
-            matched: true, 
-            matches: matchData.matches,
-            imageData 
-          })
+        if (matchResponse.ok) {
+          const matchData = await matchResponse.json()
+          
+          if (matchData.success && matchData.matches && matchData.matches.length > 0) {
+            // Show all matches with probabilities
+            setScanResult({ 
+              matched: true, 
+              matches: matchData.matches,
+              imageData 
+            })
+            // Show match animation
+            setShowMatchAnimation(true)
+            setTimeout(() => setShowMatchAnimation(false), 4000) // Fade after 4 seconds
+          } else {
+            // No matches found - show no matches screen and go back to dashboard
+            setScanResult({ matched: false, imageData })
+            setTimeout(() => {
+              router.push('/dashboard')
+            }, 2000) // Show message for 2 seconds then navigate
+          }
         } else {
-          // No matches found - show quick add interface
+          // Error or no matches - show no matches screen and go back to dashboard
           setScanResult({ matched: false, imageData })
-          setShowQuickAdd(true)
+          setTimeout(() => {
+            router.push('/dashboard')
+          }, 2000) // Show message for 2 seconds then navigate
         }
       } catch (error) {
         console.error('Error scanning key:', error)
-        setError(error instanceof Error ? error.message : 'Failed to scan key')
         setScanResult({ matched: false, imageData })
-        setShowQuickAdd(true)
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 2000) // Show message for 2 seconds then navigate
       } finally {
         setIsScanning(false)
       }
@@ -219,6 +238,7 @@ export default function ScanKeyPage() {
     setError(null)
     setIsScanning(false)
     setScanStep(0)
+    setCapturedImageData(null)
     setQuickAddName('')
     setQuickAddTags([])
     setNewTagInput('')
@@ -328,17 +348,27 @@ export default function ScanKeyPage() {
   if (scanResult && scanResult.matched && scanResult.matches && scanResult.matches.length > 0) {
     return (
       <div className="fixed inset-0 z-50 bg-black flex flex-col">
+        {/* Match Animation Overlay */}
+        {showMatchAnimation && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none">
+            <div 
+              className="bg-[#191919] border border-green-500 rounded-2xl px-8 py-6 text-center max-w-md mx-4"
+              style={{
+                animation: 'matchFoundAnimation 4s ease-in-out forwards'
+              }}
+            >
+              <h2 className="text-2xl font-bold text-white font-marlinsoft mb-2">
+                {scanResult.matches.length} {scanResult.matches.length === 1 ? 'Match gefunden!' : 'Matches gefunden!'}
+              </h2>
+              <p className="text-gray-300">Vergleiche die Wahrscheinlichkeiten</p>
+            </div>
+          </div>
+        )}
+        
         <div className="flex-1 overflow-y-auto px-4 py-6">
           <div className="max-w-2xl mx-auto space-y-6">
             {/* Header */}
             <div className="text-center">
-              <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-                <Check className="w-10 h-10 text-green-500" strokeWidth={2.5} />
-              </div>
-              <h2 className="text-2xl font-bold text-white font-marlinsoft mb-2">
-                {scanResult.matches.length} {scanResult.matches.length === 1 ? 'Match gefunden!' : 'Matches gefunden!'}
-              </h2>
-              <p className="text-gray-400">Vergleiche die Wahrscheinlichkeiten</p>
             </div>
 
             {/* Scanned Image */}
@@ -373,15 +403,40 @@ export default function ScanKeyPage() {
                   >
                     <div className="flex items-start gap-4">
                       {/* Match Image */}
-                      {match.image_url && (
-                        <div className="flex-shrink-0">
-                          <img
-                            src={match.image_url}
-                            alt={match.title}
-                            className="w-24 h-24 rounded-lg object-cover border border-white/10"
-                          />
-                        </div>
-                      )}
+                      <div className="flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border border-white/10 bg-white/5 relative group">
+                        {match.image_url ? (
+                          <>
+                            <img
+                              src={match.image_url}
+                              alt={match.title}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                console.error('Image failed to load:', match.image_url)
+                                setImageErrors(prev => new Set(prev).add(match.key_id))
+                              }}
+                            />
+                            {/* URL tooltip on hover */}
+                            <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-1">
+                              <div className="text-[8px] text-white/80 text-center break-all leading-tight font-mono">
+                                {match.image_url}
+                              </div>
+                            </div>
+                            {/* Show URL if image failed */}
+                            {imageErrors.has(match.key_id) && (
+                              <div className="absolute inset-0 bg-black/90 flex flex-col items-center justify-center p-1">
+                                <Camera className="w-6 h-6 text-white/30 mb-1" />
+                                <div className="text-[7px] text-white/60 text-center break-all leading-tight font-mono">
+                                  {match.image_url}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Camera className="w-8 h-8 text-white/30" />
+                          </div>
+                        )}
+                      </div>
                       
                       {/* Match Info */}
                       <div className="flex-1 min-w-0">
@@ -433,29 +488,40 @@ export default function ScanKeyPage() {
                           </div>
                         )}
 
-                        {/* Description */}
-                        {match.analysis?.description_summary && (
-                          <p className="text-sm text-gray-400 mb-3 line-clamp-2">
-                            {match.analysis.description_summary}
-                          </p>
-                        )}
-
-                        {/* Action Button */}
-                        <Button
-                          onClick={() => {
-                            router.push(`/dashboard?key=${match.key_id}`)
-                          }}
-                          className={`w-full ${
-                            isHighMatch 
-                              ? 'bg-green-500 hover:bg-green-600 text-white' 
-                              : isMediumMatch 
-                              ? 'bg-yellow-500 hover:bg-yellow-600 text-black' 
-                              : 'bg-white/10 hover:bg-white/20 text-white'
-                          }`}
-                        >
-                          <Sparkles className="w-4 h-4 mr-2" />
-                          Details öffnen
-                        </Button>
+                        {/* Description and Action Button */}
+                        <div className="flex items-start justify-between gap-3">
+                          {match.analysis?.description_summary && (
+                            <p className="text-sm text-gray-400 flex-1 line-clamp-2">
+                              {match.analysis.description_summary}
+                            </p>
+                          )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setClickedButtonId(match.key_id)
+                              // Add a small delay for animation feedback
+                              setTimeout(() => {
+                                router.push(`/dashboard?key=${match.key_id}`)
+                              }, 200)
+                            }}
+                            className={`
+                              flex-shrink-0 w-8 h-8 rounded-lg transition-all duration-200 flex items-center justify-center
+                              ${clickedButtonId === match.key_id 
+                                ? 'scale-75 bg-[#FF006F]' 
+                                : 'scale-100 hover:scale-110'
+                              }
+                              ${isHighMatch 
+                                ? 'bg-green-500/20 hover:bg-green-500/30 text-green-400' 
+                                : isMediumMatch 
+                                ? 'bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400' 
+                                : 'bg-white/10 hover:bg-white/20 text-white'
+                              }
+                            `}
+                            title="Details öffnen"
+                          >
+                            <Info className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -485,7 +551,25 @@ export default function ScanKeyPage() {
     )
   }
 
-  // Show quick add interface
+  // Show no matches found screen
+  if (scanResult && !scanResult.matched && !showQuickAdd) {
+    return (
+      <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+        <div className="text-center px-4">
+          <div className="w-20 h-20 rounded-full bg-gray-500/20 flex items-center justify-center mx-auto mb-4">
+            <X className="w-10 h-10 text-gray-400" strokeWidth={2.5} />
+          </div>
+          <h2 className="text-2xl font-bold text-white font-marlinsoft mb-2">
+            Keine Matches gefunden
+          </h2>
+          <p className="text-gray-400 mb-6">Der gescannte Schlüssel wurde nicht in deiner Sammlung gefunden.</p>
+          <p className="text-sm text-gray-500">Weiterleitung zum Dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Show quick add interface (kept for backward compatibility but shouldn't be used)
   if (showQuickAdd && scanResult && !scanResult.matched) {
     return (
       <div className="fixed inset-0 z-50 bg-black flex flex-col">
@@ -661,115 +745,98 @@ export default function ScanKeyPage() {
       {/* Multi-Step Scanning Animation Overlay */}
       {isScanning && (
         <div className="absolute inset-0 bg-black/90 flex items-center justify-center z-20">
-          <div className="text-center space-y-8 max-w-md mx-auto px-6">
-            {/* Step Indicators */}
-            <div className="flex items-center justify-center gap-2 mb-6">
-              {[1, 2, 3, 4].map((step) => {
-                const isCompleted = scanStep > step
-                const isCurrent = scanStep === step
+          <div className="max-w-md mx-auto px-6 w-full">
+            {/* Vertical Card Stack */}
+            <div className="space-y-3">
+              {[
+                { step: 1, title: 'Bild wird hochgeladen', description: 'Speichere das gescannte Bild' },
+                { step: 2, title: 'Schlüssel wird analysiert', description: 'Erkenne Merkmale und Details' },
+                { step: 3, title: 'Vergleiche mit Sammlung', description: 'Suche nach ähnlichen Schlüsseln' },
+                { step: 4, title: 'Berechne Ähnlichkeiten', description: 'Analysiere Übereinstimmungen' },
+                { step: 5, title: 'Fertig', description: 'Ergebnisse werden geladen' },
+              ].map((stepData) => {
+                const isCompleted = scanStep > stepData.step
+                const isCurrent = scanStep === stepData.step
+                const isPending = scanStep < stepData.step
                 
                 return (
-                  <React.Fragment key={step}>
-                    <div className="flex flex-col items-center gap-2 relative">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                        isCompleted 
-                          ? 'bg-green-500/20 border-2 border-green-500' 
+                  <div
+                    key={stepData.step}
+                    className={`
+                      bg-[#191919] rounded-xl p-4 border transition-all duration-500
+                      ${isCompleted 
+                        ? 'border-green-500/50 bg-green-500/5' 
+                        : isCurrent 
+                        ? 'border-[#FF006F] bg-[#FF006F]/10 shadow-lg shadow-[#FF006F]/20' 
+                        : 'border-white/10 bg-[#191919] opacity-50'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Status Indicator */}
+                      <div className={`
+                        w-3 h-3 rounded-full flex-shrink-0 transition-all duration-300
+                        ${isCompleted 
+                          ? 'bg-green-500' 
                           : isCurrent 
-                          ? 'bg-[#FF006F]/20 border-2 border-[#FF006F] animate-pulse' 
-                          : 'bg-white/10 border-2 border-white/20'
-                      }`}>
-                        {isCompleted ? (
-                          <Check className="w-6 h-6 text-green-500" strokeWidth={3} />
-                        ) : isCurrent ? (
-                          <div className="w-4 h-4 bg-[#FF006F] rounded-full animate-pulse" />
-                        ) : (
-                          <div className="w-4 h-4 bg-white/30 rounded-full" />
+                          ? 'bg-[#FF006F] animate-pulse' 
+                          : 'bg-white/20'
+                        }
+                      `} />
+                      
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className={`
+                          text-base font-semibold mb-1 transition-colors
+                          ${isCompleted 
+                            ? 'text-green-400' 
+                            : isCurrent 
+                            ? 'text-white' 
+                            : 'text-gray-400'
+                          }
+                        `}>
+                          {stepData.title}
+                        </h3>
+                        <p className={`
+                          text-sm transition-colors
+                          ${isCompleted || isCurrent 
+                            ? 'text-gray-300' 
+                            : 'text-gray-500'
+                          }
+                        `}>
+                          {stepData.description}
+                        </p>
+                        {/* Show scanned image in step 1 */}
+                        {stepData.step === 1 && isCurrent && capturedImageData && (
+                          <div className="mt-3 rounded-lg overflow-hidden border border-white/10">
+                            <img
+                              src={capturedImageData}
+                              alt="Scanned key"
+                              className="w-full h-auto max-h-32 object-contain"
+                            />
+                          </div>
                         )}
                       </div>
+                      
+                      {/* Loading indicator for current step */}
                       {isCurrent && (
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
-                          <div className="w-2 h-2 bg-[#FF006F] rounded-full animate-ping" />
+                        <div className="flex-shrink-0">
+                          <div className="w-5 h-5 border-2 border-[#FF006F] border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      )}
+                      
+                      {/* Checkmark for completed steps */}
+                      {isCompleted && (
+                        <div className="flex-shrink-0">
+                          <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
+                            <div className="w-2 h-2 bg-white rounded-full" />
+                          </div>
                         </div>
                       )}
                     </div>
-                    {step < 4 && (
-                      <div className={`h-0.5 w-6 transition-all duration-500 ${
-                        scanStep > step ? 'bg-green-500' : 'bg-white/20'
-                      }`} />
-                    )}
-                  </React.Fragment>
+                  </div>
                 )
               })}
-            </div>
-
-            {/* Step Content */}
-            <div className="space-y-4 min-h-[120px] flex flex-col justify-center">
-              {scanStep === 1 && (
-                <div className="space-y-4 animate-in">
-                  <div className="relative w-24 h-24 mx-auto">
-                    <Camera className="w-24 h-24 text-[#FF006F] animate-pulse" />
-                    <div className="absolute inset-0 border-4 border-[#FF006F] rounded-full animate-ping opacity-30" />
-                  </div>
-                  <div>
-                    <p className="text-white text-xl font-semibold">Bild wird hochgeladen...</p>
-                    <p className="text-gray-400 text-sm mt-1">Speichere das gescannte Bild</p>
-                  </div>
-                </div>
-              )}
-              
-              {scanStep === 2 && (
-                <div className="space-y-4 animate-in">
-                  <div className="relative w-24 h-24 mx-auto">
-                    <Sparkles className="w-24 h-24 text-[#FF006F] animate-pulse" />
-                    <div className="absolute inset-0 border-4 border-[#FF006F] rounded-full animate-ping opacity-30" />
-                  </div>
-                  <div>
-                    <p className="text-white text-xl font-semibold">Schlüssel wird analysiert...</p>
-                    <p className="text-gray-400 text-sm mt-1">Erkenne Merkmale und Details</p>
-                  </div>
-                </div>
-              )}
-              
-              {scanStep === 3 && (
-                <div className="space-y-4 animate-in">
-                  <div className="relative w-24 h-24 mx-auto">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#FF006F] to-pink-500 flex items-center justify-center animate-pulse">
-                      <Tag className="w-12 h-12 text-white" strokeWidth={2} />
-                    </div>
-                    <div className="absolute inset-0 border-4 border-[#FF006F] rounded-full animate-ping opacity-30" />
-                  </div>
-                  <div>
-                    <p className="text-white text-xl font-semibold">Vergleiche mit Sammlung...</p>
-                    <p className="text-gray-400 text-sm mt-1">Suche nach ähnlichen Schlüsseln</p>
-                  </div>
-                </div>
-              )}
-              
-              {scanStep === 4 && (
-                <div className="space-y-4 animate-in">
-                  <div className="relative w-24 h-24 mx-auto">
-                    <div className="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center">
-                      <Check className="w-16 h-16 text-green-500" strokeWidth={3} />
-                    </div>
-                    <div className="absolute inset-0 border-4 border-green-500 rounded-full animate-ping opacity-30" />
-                  </div>
-                  <div>
-                    <p className="text-white text-xl font-semibold">Fertig!</p>
-                    <p className="text-gray-400 text-sm mt-1">Ergebnisse werden geladen...</p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full max-w-xs mx-auto">
-              <div className="h-2 bg-black/40 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-[#FF006F] via-pink-500 to-[#FF006F] rounded-full transition-all duration-500 bg-[length:200%_100%] animate-[shimmer_2s_ease-in-out_infinite]"
-                  style={{ width: `${(scanStep / 4) * 100}%` }}
-                />
-              </div>
-              <p className="text-gray-400 text-xs mt-2">Schritt {scanStep} von 4</p>
             </div>
           </div>
         </div>
@@ -819,3 +886,4 @@ export default function ScanKeyPage() {
     </div>
   )
 }
+

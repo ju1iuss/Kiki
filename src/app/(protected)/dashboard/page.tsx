@@ -1,10 +1,12 @@
 'use client'
 
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Trash2, X, Check, Search, CheckSquare2, Edit2, Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { useKeyDetail } from '@/contexts/key-detail-context'
+import confetti from 'canvas-confetti'
 
 interface Key {
   id: string
@@ -19,6 +21,7 @@ interface Key {
 export default function DashboardPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { setIsViewingKeyDetails } = useKeyDetail()
   const [keys, setKeys] = useState<Key[]>([])
   const [loading, setLoading] = useState(true)
   const [retryCount, setRetryCount] = useState(0)
@@ -31,6 +34,19 @@ export default function DashboardPage() {
   const [editedCustomDescription, setEditedCustomDescription] = useState('')
   const [editedAnalysis, setEditedAnalysis] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const prevKeysLengthRef = useRef(0)
+
+  // Show confetti when reaching 5 keys (transitioning from 4 to 5)
+  useEffect(() => {
+    if (keys.length === 5 && prevKeysLengthRef.current < 5) {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      })
+    }
+    prevKeysLengthRef.current = keys.length
+  }, [keys.length])
 
   useEffect(() => {
     const fetchKeys = async () => {
@@ -71,6 +87,11 @@ export default function DashboardPage() {
     
     fetchKeys()
   }, [retryCount, searchParams, router])
+
+  // Update context when viewing key details
+  useEffect(() => {
+    setIsViewingKeyDetails(selectedKey !== null)
+  }, [selectedKey, setIsViewingKeyDetails])
 
   const handleDelete = async (keyId: string) => {
     if (!confirm('Are you sure you want to delete this key?')) return
@@ -516,13 +537,30 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Progress Banner */}
+      {keys.length > 0 && keys.length < 5 && (
+        <div className="mx-4 px-4 py-3 bg-white/5 text-white rounded-lg border border-white/10 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-lg">🎉</span>
+            <span className="font-medium">Füge deine ersten 5 Schlüssel hinzu</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <span key={index} className="text-lg">
+                {index < keys.length ? '🔑' : '○'}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="px-4 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white font-marlinsoft">
             Dashboard
           </h1>
           <p className="text-gray-400 mt-2">
-            Manage your API keys
+            Verwalte deine physischen Schlüssel
           </p>
         </div>
         {!selectionMode ? (
@@ -530,7 +568,7 @@ export default function DashboardPage() {
             <Button
               onClick={() => setSelectionMode(true)}
               size="icon"
-              className="bg-white text-black hover:bg-gray-100"
+              variant="secondary"
               title="Select"
             >
               <CheckSquare2 className="w-5 h-5" />
@@ -593,7 +631,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 gap-4 px-4">
           {Array.from({ length: 6 }).map((_, index) => (
             <div key={index} className="aspect-square animate-pulse overflow-hidden rounded-lg">
-              <div className="w-full h-full bg-[#000000] rounded-lg"></div>
+              <div className="w-full h-full bg-[#000000] rounded-lg border border-gray-700"></div>
             </div>
           ))}
         </div>
