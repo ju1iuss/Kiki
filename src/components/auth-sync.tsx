@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { saveOnboardingImages } from '@/lib/onboarding-storage'
 
 // Storage key format - keeping similar structure for Chrome extension compatibility
@@ -9,7 +9,8 @@ import { saveOnboardingImages } from '@/lib/onboarding-storage'
 const STORAGE_KEY = `clerk-auth-token`
 
 export function AuthSync() {
-  const { isSignedIn, userId, getToken, user } = useAuth()
+  const { isSignedIn, userId, getToken } = useAuth()
+  const { user } = useUser()
 
   useEffect(() => {
     const syncSession = async () => {

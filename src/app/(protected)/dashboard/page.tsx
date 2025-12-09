@@ -130,7 +130,7 @@ export default function DashboardPage() {
           ...selectedKey, 
           title: editedTitle, 
           custom_description: editedCustomDescription || undefined,
-          description: description 
+          description: description || undefined
         }
         setSelectedKey(updatedKey)
         // Update keys list
@@ -189,7 +189,7 @@ export default function DashboardPage() {
     if (analysis.key_type && analysis.key_type !== 'unknown') {
       sections.push({
         title: 'Key Type',
-        content: analysis.key_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        content: analysis.key_type.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
         type: 'badge'
       })
     }
@@ -210,7 +210,7 @@ export default function DashboardPage() {
     if (analysis.material?.type) {
       sections.push({
         title: 'Material',
-        content: analysis.material.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        content: analysis.material.type.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
         type: 'badge'
       })
     }

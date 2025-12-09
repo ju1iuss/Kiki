@@ -80,11 +80,6 @@ export async function POST(request: NextRequest) {
     // Log success for debugging
     console.log('Key saved successfully:', { id: newKey.id, title, hasDescription: !!newKey.description })
 
-    if (error) {
-      console.error('Error creating key:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
     return NextResponse.json({ success: true, key: newKey })
   } catch (error) {
     console.error('Error in POST /api/keys:', error)

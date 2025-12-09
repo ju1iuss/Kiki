@@ -4,13 +4,14 @@ import React, { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useOnboarding } from '../onboarding-context'
 import { OnboardingCard } from '../onboarding-card'
-import { useAuth } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { saveOnboardingImages } from '@/lib/onboarding-storage'
 
 export function Step8Password() {
   const router = useRouter()
   const { nextStep, updateData } = useOnboarding()
-  const { isSignedIn, isLoaded, user } = useAuth()
+  const { isSignedIn, isLoaded } = useAuth()
+  const { user } = useUser()
 
   // Check if user is already signed in
   useEffect(() => {
