@@ -79,12 +79,52 @@ export function KeyCamera({ onCapture, onClose }: KeyCameraProps) {
         throw new Error('Could not get canvas context')
       }
 
-      // Set canvas size to match video
-      canvas.width = video.videoWidth || video.clientWidth
-      canvas.height = video.videoHeight || video.clientHeight
+      const videoWidth = video.videoWidth || video.clientWidth
+      const videoHeight = video.videoHeight || video.clientHeight
 
-      // Draw the video frame to canvas
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+      // Target aspect ratio: 3:5 (width:height = 3:5 = 0.6)
+      const targetAspectRatio = 3 / 5 // 0.6
+
+      // Calculate crop area based on key overlay shape (centered)
+      // Key overlay is centered at 50% with scale 1.3
+      // Use the overlay region as the base for cropping
+      const overlayCenterX = videoWidth * 0.5
+      const overlayCenterY = videoHeight * 0.5
+      const overlayWidth = videoWidth * 0.52
+      const overlayHeight = videoHeight * 0.65
+
+      // Calculate crop dimensions to fit 3:5 aspect ratio
+      // Use the larger dimension to ensure we capture enough area
+      let cropWidth: number
+      let cropHeight: number
+
+      if (overlayWidth / overlayHeight > targetAspectRatio) {
+        // Overlay is wider than target ratio, fit to height
+        cropHeight = overlayHeight
+        cropWidth = cropHeight * targetAspectRatio
+      } else {
+        // Overlay is taller than target ratio, fit to width
+        cropWidth = overlayWidth
+        cropHeight = cropWidth / targetAspectRatio
+      }
+
+      // Center the crop on the overlay center
+      const cropX = overlayCenterX - cropWidth / 2
+      const cropY = overlayCenterY - cropHeight / 2
+
+      // Set canvas to exact 3:5 aspect ratio dimensions
+      // Use a reasonable output size (e.g., 600x1000 pixels for good quality)
+      const outputWidth = 600
+      const outputHeight = 1000
+      canvas.width = outputWidth
+      canvas.height = outputHeight
+
+      // Draw the cropped video frame to canvas, scaled to exact 3:5 dimensions
+      ctx.drawImage(
+        video,
+        Math.max(0, cropX), Math.max(0, cropY), cropWidth, cropHeight, // Source rectangle (crop from video)
+        0, 0, outputWidth, outputHeight // Destination rectangle (exact 3:5 size)
+      )
 
       // Convert to base64 image
       const imageData = canvas.toDataURL('image/jpeg', 0.9)

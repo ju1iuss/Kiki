@@ -7,7 +7,9 @@
  * All landing page changes should be made here.
  */
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { ArrowRight, Key, ScanLine, Shield, Smartphone, Cloud } from 'lucide-react'
 import Image from 'next/image'
@@ -15,8 +17,59 @@ import { useAuth } from '@clerk/nextjs'
 
 export default function Home() {
   const { isSignedIn, isLoaded } = useAuth()
+  const router = useRouter()
   const isLoggedIn = isSignedIn ?? false
   const loading = !isLoaded
+  const [showAnimation, setShowAnimation] = useState(true)
+  const [animationPhase, setAnimationPhase] = useState<'image' | 'emoji' | 'text'>('image')
+
+  // Redirect if logged in
+  useEffect(() => {
+    if (isLoaded && isLoggedIn) {
+      router.push('/dashboard')
+    }
+  }, [isLoaded, isLoggedIn, router])
+
+  // Start animation immediately on mount
+  useEffect(() => {
+    console.log('Animation starting...')
+    // Prevent scrolling during animation
+    document.body.style.overflow = 'hidden'
+
+    // Animation timeline: 5 seconds total
+    // Phase 1: Show image (0-1.5s)
+    const timer1 = setTimeout(() => {
+      console.log('Phase: emoji')
+      setAnimationPhase('emoji')
+    }, 1500)
+
+    // Phase 2: Show emoji + image (1.5-2.5s)
+    const timer2 = setTimeout(() => {
+      console.log('Phase: text')
+      setAnimationPhase('text')
+    }, 2500)
+
+    // Phase 3: Show text + emoji + image (2.5-5s), then fade out and show landing page
+    const timer3 = setTimeout(() => {
+      console.log('Animation complete')
+      setShowAnimation(false)
+      document.body.style.overflow = ''
+    }, 5000)
+
+    return () => {
+      clearTimeout(timer1)
+      clearTimeout(timer2)
+      clearTimeout(timer3)
+      document.body.style.overflow = ''
+    }
+  }, [])
+
+  // Don't render anything if logged in
+  if (isLoaded && isLoggedIn) {
+    return null
+  }
+
+  console.log('Render - showAnimation:', showAnimation, 'phase:', animationPhase)
 
   return (
     <div 
@@ -27,20 +80,74 @@ export default function Home() {
         overscrollBehavior: 'none',
       }}
     >
+      {/* Landing Page Animation */}
+      {showAnimation ? (
+        <div 
+          className="fixed inset-0 bg-[#191919] flex items-center justify-center transition-opacity duration-500"
+          style={{ 
+            zIndex: 999999,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            width: '100vw',
+            height: '100vh',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Image - always visible */}
+          <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6">
+            <Image 
+              src="/keys.png" 
+              alt="Keys" 
+              width={800} 
+              height={600}
+              className="w-full max-w-md sm:max-w-lg md:max-w-2xl mx-auto object-contain opacity-60"
+              unoptimized
+              priority
+            />
+          </div>
+
+          {/* Phase 1: Image only (no overlay) */}
+          {animationPhase === 'image' && null}
+
+          {/* Phase 2: Emoji overlay */}
+          {animationPhase === 'emoji' && (
+            <div className="relative z-10 flex flex-col items-center justify-center w-full h-full">
+              <div className="text-6xl sm:text-8xl md:text-9xl animate-bounce">😅</div>
+            </div>
+          )}
+
+          {/* Phase 3: Emoji + Text overlay */}
+          {animationPhase === 'text' && (
+            <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-4 sm:px-6">
+              <div className="text-6xl sm:text-8xl md:text-9xl mb-6 sm:mb-8 animate-bounce">😅</div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold font-marlinsoft leading-[1.1] tracking-tight text-white text-center max-w-4xl">
+                "Für was ist dieser Schlüssel nochmal?"
+              </h1>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {/* Main Landing Page Content */}
+      <div 
+        className={showAnimation ? 'opacity-0 pointer-events-none' : 'opacity-100 transition-opacity duration-500'}
+        style={{ zIndex: showAnimation ? -1 : 1 }}
+      >
       {/* Floating Cloud Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-3 sm:pt-4 px-3 sm:px-4" style={{ zIndex: 100 }}>
+      <header 
+        className={`fixed top-0 left-0 right-0 flex justify-center pt-3 sm:pt-4 px-3 sm:px-4 transition-opacity duration-500 ${
+          showAnimation ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        }`}
+        style={{ zIndex: showAnimation ? -1 : 100 }}
+      >
         <nav className="w-full max-w-sm">
           <div className="bg-[#191919] backdrop-blur-xl rounded-full border border-gray-600/60 shadow-lg px-4 py-3 sm:px-6 sm:py-4">
             <div className="flex items-center justify-between gap-2 sm:gap-4">
-              <Link href="/" className="flex items-center justify-center text-white hover:text-gray-300 transition-colors min-h-[44px] min-w-[44px]">
-                <Image 
-                  src="/favicon.ico" 
-                  alt="Kiki" 
-                  width={24} 
-                  height={24}
-                  className="h-6 w-6 sm:h-7 sm:w-7"
-                  unoptimized
-                />
+              <Link href="/" className="flex items-center justify-center text-white hover:text-gray-300 transition-colors min-h-[44px] font-marlinsoft font-bold text-lg sm:text-xl">
+                KeyScan
               </Link>
               <div className="hidden md:flex items-center gap-4 lg:gap-6">
                 <Link href="#reviews" className="text-sm lg:text-base font-medium text-white hover:text-gray-300 transition-colors font-marlinsoft min-h-[44px] flex items-center">
@@ -104,28 +211,122 @@ export default function Home() {
               <div className="h-4 sm:h-5 w-px bg-white/20"></div>
               
               {/* Review Count */}
-              <span className="text-xs sm:text-sm text-gray-300 font-medium">100+ Bewertungen</span>
+              <span className="text-xs sm:text-sm text-gray-300 font-medium">168+ Bewertungen</span>
             </div>
           </div>
           
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-6 font-marlinsoft leading-[1.1] tracking-tight px-2">
-            Verliere nie wieder deine Schlüssel
+          <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-bold mb-4 sm:mb-6 font-marlinsoft leading-[1.1] tracking-tight px-2">
+            Vergiss nie wieder für was deine Schlüssel sind
           </h1>
           <p className="text-base sm:text-lg md:text-xl text-gray-400 mb-8 sm:mb-10 font-marlinsoft max-w-2xl mx-auto px-2 leading-relaxed">
-            Intelligentes Schlüsselmanagement für das moderne Leben. 
-            Verwalte alle deine physischen Schlüssel digital – einfach, sicher und immer verfügbar.
+            Der sichere Tresor für deine physischen Schlüssel. 
+            Speichere und erkenne alle deine Schlüssel digital – einfach und sicher.
           </p>
-          <div className="flex flex-row items-center justify-center gap-3 sm:gap-4 px-2">
+          <div className="flex flex-col items-center justify-center gap-3 sm:gap-4 px-2">
             {!loading && (
-              <Button asChild size="lg" className="w-auto min-w-[160px] sm:min-w-[220px] text-sm sm:text-lg px-4 sm:px-8 py-4 sm:py-7 bg-white text-black hover:bg-gray-200 border-0 font-marlinsoft group min-h-[48px] sm:min-h-[60px]">
-                <Link href={isLoggedIn ? "/dashboard" : "/sign-up"} className="flex items-center justify-center gap-2 sm:gap-3">
-                  {isLoggedIn ? "Zum Dashboard" : "Loslegen"}
-                  <span className="relative w-4 h-4 sm:w-6 sm:h-6 flex items-center justify-center">
-                    <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 absolute transition-transform duration-300 group-hover:translate-x-1" />
-                  </span>
-                </Link>
-              </Button>
+              <>
+                <Button asChild size="lg" className="w-auto min-w-[200px] sm:min-w-[280px] text-sm sm:text-lg px-6 sm:px-10 py-4 sm:py-7 bg-white text-black hover:bg-gray-200 border-0 font-marlinsoft group min-h-[48px] sm:min-h-[60px]">
+                  <Link href={isLoggedIn ? "/dashboard" : "/sign-up"} className="flex items-center justify-center gap-2 sm:gap-3">
+                    {isLoggedIn ? "Zum Dashboard" : "Loslegen"}
+                    <span className="relative w-4 h-4 sm:w-6 sm:h-6 flex items-center justify-center">
+                      <ArrowRight className="w-4 h-4 sm:w-6 sm:h-6 absolute transition-transform duration-300 group-hover:translate-x-1" />
+                    </span>
+                  </Link>
+                </Button>
+                <p className="text-xs sm:text-sm text-gray-500 font-marlinsoft">
+                  100% sicher und verschlüsselt
+                </p>
+              </>
             )}
+          </div>
+          <div className="mt-8 sm:mt-12 px-2">
+            <div className="flex flex-row items-center justify-center gap-3 sm:gap-6 md:gap-12 max-w-6xl mx-auto">
+              {/* Left: Physical Key with Scanning Animation */}
+              <div className="relative flex-1 max-w-xs sm:max-w-sm md:max-w-md">
+                <div className="relative aspect-square rounded-lg overflow-hidden bg-[#2a2a2a] border border-white/10">
+                  <Image 
+                    src="/key.jpg" 
+                    alt="Physical Key" 
+                    width={400} 
+                    height={400}
+                    className="w-full h-full object-cover"
+                    unoptimized
+                  />
+                  {/* Scanning Animation */}
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <div 
+                      className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent" 
+                      style={{
+                        boxShadow: '0 0 20px 4px rgba(59, 130, 246, 0.8)',
+                        animation: 'scan 2s ease-in-out infinite',
+                      }}
+                    />
+                  </div>
+                  {/* Corner indicators */}
+                  <div className="absolute top-2 left-2 w-4 h-4 sm:w-6 sm:h-6 border-t-2 border-l-2 border-blue-400" />
+                  <div className="absolute top-2 right-2 w-4 h-4 sm:w-6 sm:h-6 border-t-2 border-r-2 border-blue-400" />
+                  <div className="absolute bottom-2 left-2 w-4 h-4 sm:w-6 sm:h-6 border-b-2 border-l-2 border-blue-400" />
+                  <div className="absolute bottom-2 right-2 w-4 h-4 sm:w-6 sm:h-6 border-b-2 border-r-2 border-blue-400" />
+                </div>
+              </div>
+
+              {/* Arrow */}
+              <div className="flex items-center justify-center flex-shrink-0">
+                <ArrowRight className="w-6 h-6 sm:w-8 sm:h-8 md:w-12 md:h-12 text-white/60" />
+              </div>
+
+              {/* Right: Key Card */}
+              <div className="flex-1 max-w-xs sm:max-w-sm md:max-w-md">
+                <div className="bg-[#2a2a2a] border border-white/10 rounded-lg p-4 sm:p-6 md:p-8 shadow-xl">
+                  {/* Key Image in Card */}
+                  <div className="mb-3 sm:mb-4">
+                    <Image 
+                      src="/key.jpg" 
+                      alt="Key" 
+                      width={300} 
+                      height={200}
+                      className="w-full h-24 sm:h-32 md:h-40 object-cover rounded-lg"
+                      unoptimized
+                    />
+                  </div>
+                  
+                  {/* Key Information */}
+                  <div className="space-y-2 sm:space-y-3">
+                    <div>
+                      <h3 className="text-base sm:text-lg md:text-xl font-bold text-white font-marlinsoft mb-1">
+                        Haustürschlüssel
+                      </h3>
+                      <p className="text-xs sm:text-sm text-gray-400">
+                        Haupteingang Wohnung
+                      </p>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-blue-500/20 text-blue-300 text-xs rounded-full border border-blue-500/30">
+                        Wohnung
+                      </span>
+                      <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-green-500/20 text-green-300 text-xs rounded-full border border-green-500/30">
+                        Wichtig
+                      </span>
+                      <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 bg-purple-500/20 text-purple-300 text-xs rounded-full border border-purple-500/30">
+                        Täglich
+                      </span>
+                    </div>
+                    
+                    <div className="pt-2 border-t border-white/10">
+                      <div className="flex items-center justify-between text-xs sm:text-sm">
+                        <span className="text-gray-400">Erkannt:</span>
+                        <span className="text-white font-medium">Schließzylinder</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs sm:text-sm mt-1">
+                        <span className="text-gray-400">Marke:</span>
+                        <span className="text-white font-medium">Yale</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -135,10 +336,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="mb-8 sm:mb-12">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-left mb-2 sm:mb-3 font-marlinsoft">
-              Warum Kiki?
+              Warum KeyScan?
             </h2>
             <p className="text-sm sm:text-base text-gray-400 text-left">
-              Alles was du brauchst für intelligentes Schlüsselmanagement
+              Der sichere Tresor für deine physischen Schlüssel mit intelligenter Erkennung
             </p>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
@@ -146,9 +347,9 @@ export default function Home() {
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-lg flex items-center justify-center mb-3 sm:mb-4">
                 <Key className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-white mb-2 sm:mb-3 font-marlinsoft">Digitale Schlüsselverwaltung</h3>
+              <h3 className="text-base sm:text-lg font-bold text-white mb-2 sm:mb-3 font-marlinsoft">Sicherer Tresor für Schlüssel</h3>
               <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-                Verwalte alle deine physischen Schlüssel digital in einer sicheren Cloud-Lösung. Nie wieder Schlüssel verlieren.
+                Speichere alle deine physischen Schlüssel sicher in einem digitalen Tresor. Nie wieder Schlüssel verlieren.
               </p>
             </div>
             
@@ -158,7 +359,7 @@ export default function Home() {
               </div>
               <h3 className="text-base sm:text-lg font-bold text-white mb-2 sm:mb-3 font-marlinsoft">KI-gestützte Erkennung</h3>
               <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">
-                Scanne deine Schlüssel mit der Kamera und unsere KI erkennt automatisch den Typ, die Marke und wichtige Details.
+                Scanne deine Schlüssel mit der Kamera und unsere KI erkennt automatisch den Typ, die Marke und wichtige Details. Erkenne jeden Schlüssel sofort wieder.
               </p>
             </div>
             
@@ -213,7 +414,7 @@ export default function Home() {
               Vertrauen von Nutzern weltweit
             </h2>
             <p className="text-sm sm:text-base text-gray-400 text-left">
-              Über 1.000 Nutzer vertrauen bereits auf Kiki für ihr Schlüsselmanagement
+              Über 1.000 Nutzer vertrauen bereits auf KeyScan für ihr Schlüsselmanagement
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -230,7 +431,7 @@ export default function Home() {
                 </div>
               </div>
               <p className="text-xs sm:text-sm text-gray-500 leading-relaxed">
-                Nutzer aus über 50 Ländern verwalten ihre Schlüssel mit Kiki
+                Nutzer aus über 50 Ländern verwalten ihre Schlüssel mit KeyScan
               </p>
             </div>
             
@@ -318,7 +519,7 @@ export default function Home() {
                 className="h-5 w-5"
                 unoptimized
               />
-              <span className="text-xs sm:text-sm text-gray-400">© 2024 Kiki. Alle Rechte vorbehalten.</span>
+              <span className="text-xs sm:text-sm text-gray-400">© 2024 KeyScan. Alle Rechte vorbehalten.</span>
             </div>
             <div className="flex items-center gap-4">
               <Link href="#twitter" className="text-gray-400 hover:text-white transition-colors">
@@ -335,6 +536,7 @@ export default function Home() {
           </div>
         </div>
       </footer>
+      </div>
 
     </div>
   );

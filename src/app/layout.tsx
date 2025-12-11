@@ -26,27 +26,27 @@ const merriweather = Merriweather({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://app.tasy.ai'),
+  metadataBase: new URL('https://mamakey.app'),
   title: {
-    default: "Tasy - Instant Replace",
-    template: "%s | Tasy"
+    default: "KeyScan - Der sichere Tresor für deine Schlüssel",
+    template: "%s | KeyScan"
   },
-  description: "Create Instagram ready Stories - within seconds.",
+  description: "KeyScan ist der sichere Tresor für deine physischen Schlüssel. Speichere und erkenne alle deine Schlüssel digital mit KI-gestützter Erkennung.",
   keywords: [
-    "Instagram Stories",
-    "Instagram content",
-    "Story creation",
-    "social media content",
-    "AI content creation",
-    "instant stories",
-    "Instagram ready",
-    "story templates",
-    "content creation",
-    "social media tools"
+    "Schlüsselverwaltung",
+    "Schlüssel Tresor",
+    "physische Schlüssel",
+    "Schlüssel erkennen",
+    "KI Schlüsselerkennung",
+    "Schlüsselmanagement",
+    "digitale Schlüsselverwaltung",
+    "Schlüssel scannen",
+    "Schlüssel speichern",
+    "Schlüssel organisieren"
   ],
-  authors: [{ name: "Tasy" }],
-  creator: "Tasy",
-  publisher: "Tasy",
+  authors: [{ name: "KeyScan" }],
+  creator: "KeyScan",
+  publisher: "KeyScan",
   formatDetection: {
     email: false,
     address: false,
@@ -59,26 +59,26 @@ export const metadata: Metadata = {
   manifest: '/manifest.json',
   openGraph: {
     type: "website",
-    locale: "en_US",
-    url: "https://app.tasy.ai",
-    siteName: "Tasy",
-    title: "Tasy - Instant Replace",
-    description: "Create Instagram ready Stories - within seconds.",
+    locale: "de_DE",
+    url: "https://mamakey.app",
+    siteName: "KeyScan",
+    title: "KeyScan - Der sichere Tresor für deine Schlüssel",
+    description: "KeyScan ist der sichere Tresor für deine physischen Schlüssel. Speichere und erkenne alle deine Schlüssel digital mit KI-gestützter Erkennung.",
     images: [
       {
         url: "/icon.png",
         width: 1200,
         height: 630,
-        alt: "Tasy - Instant Replace",
+        alt: "KeyScan - Der sichere Tresor für deine Schlüssel",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tasy - Instant Replace",
-    description: "Create Instagram ready Stories - within seconds.",
+    title: "KeyScan - Der sichere Tresor für deine Schlüssel",
+    description: "KeyScan ist der sichere Tresor für deine physischen Schlüssel. Speichere und erkenne alle deine Schlüssel digital mit KI-gestützter Erkennung.",
     images: ["/icon.png"],
-    creator: "@tasy",
+    creator: "@mamakey",
   },
   robots: {
     index: true,

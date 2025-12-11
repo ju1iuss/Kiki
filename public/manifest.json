@@ -1,11 +1,11 @@
 {
-  "name": "Tasy - Instant Replace",
-  "short_name": "Tasy Instant Replace",
-  "description": "Create Instagram ready Stories - within seconds.",
+  "name": "KeyScan - Der sichere Tresor für deine Schlüssel",
+  "short_name": "KeyScan",
+  "description": "KeyScan ist der sichere Tresor für deine physischen Schlüssel. Speichere und erkenne alle deine Schlüssel digital mit KI-gestützter Erkennung.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#191919",
+  "theme_color": "#191919",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -20,8 +20,8 @@
       "type": "image/x-icon"
     }
   ],
-  "categories": ["productivity", "business", "social"],
-  "lang": "en-US",
+  "categories": ["productivity", "utilities", "lifestyle"],
+  "lang": "de-DE",
   "dir": "ltr"
 }
 

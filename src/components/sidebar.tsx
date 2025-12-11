@@ -4,10 +4,12 @@ import React, { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
-import { Plus, Settings, LayoutDashboard, ScanLine } from 'lucide-react'
+import { Plus, Settings, LayoutDashboard, ScanLine, Check, X, Info } from 'lucide-react'
 import Image from 'next/image'
 import { KeyCamera } from './key-camera'
 import { useKeyDetail } from '@/contexts/key-detail-context'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
 interface SidebarProps {
   className?: string
@@ -20,6 +22,8 @@ export function Sidebar({ className }: SidebarProps) {
   const { user } = useUser()
   const { isViewingKeyDetails } = useKeyDetail()
   const [showCamera, setShowCamera] = useState(false)
+  const [showInfoModal, setShowInfoModal] = useState(false)
+  const [dontShowAgain, setDontShowAgain] = useState(false)
 
   const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -132,11 +136,24 @@ export function Sidebar({ className }: SidebarProps) {
   }
 
   const handleAddKeyClick = (e: React.MouseEvent) => {
-    // On mobile, open camera directly; on desktop, navigate normally
+    // On mobile, show info modal first (if not dismissed), then camera
     if (window.innerWidth < 1024) {
       e.preventDefault()
-      setShowCamera(true)
+      const shouldShowModal = localStorage.getItem('key-add-info-dismissed') !== 'true'
+      if (shouldShowModal) {
+        setShowInfoModal(true)
+      } else {
+        setShowCamera(true)
+      }
     }
+  }
+
+  const handleInfoModalContinue = () => {
+    if (dontShowAgain) {
+      localStorage.setItem('key-add-info-dismissed', 'true')
+    }
+    setShowInfoModal(false)
+    setShowCamera(true)
   }
 
   const handleScanKeyClick = () => {
@@ -226,6 +243,90 @@ export function Sidebar({ className }: SidebarProps) {
           onClose={() => setShowCamera(false)}
         />
       )}
+
+      {/* Add Key Info Modal */}
+      <Dialog open={showInfoModal} onOpenChange={setShowInfoModal}>
+        <DialogContent className="max-w-md bg-[#191919] border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-semibold text-white">
+              Bitte beachten Sie folgende Hinweise:
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Positive Checklist - Green */}
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                <span className="text-sm text-gray-200">Sauberer einfarbiger Hintergrund</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                <span className="text-sm text-gray-200">Nicht mehrere Schlüssel auf dem Bild sichtbar</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                <span className="text-sm text-gray-200">Schlüssel zeigt nach unten (Seite egal)</span>
+              </div>
+            </div>
+
+            {/* Negative Examples - Red */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-start gap-3">
+                <X className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                <span className="text-sm text-gray-200">Unruhiger oder gemusterter Hintergrund</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <X className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                <span className="text-sm text-gray-200">Mehrere Schlüssel gleichzeitig auf dem Bild</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <X className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" strokeWidth={3} />
+                <span className="text-sm text-gray-200">Schlüssel zeigt nach oben oder zur Seite</span>
+              </div>
+            </div>
+
+            {/* Information - Equal points with info icons */}
+            <div className="pt-4 border-t border-white/10 space-y-3">
+              <div className="flex items-start gap-3">
+                <Info className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-gray-300">Alle Schlüssel sind möglich</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <Info className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-gray-300">Nur eine Seite nötig, welche ist egal (unsere trainierte KI erkennt jeden Schlüssel und kategorisiert ihn an seinem Aussehen)</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <Info className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-gray-300">Alle Schlüssel sind encrypted und sicher saved hosted in Deutschland</span>
+              </div>
+            </div>
+
+            {/* Don't show again checkbox */}
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="dont-show-again"
+                checked={dontShowAgain}
+                onChange={(e) => setDontShowAgain(e.target.checked)}
+                className="w-4 h-4 rounded border-0 bg-transparent text-[#FF006F] focus:ring-0 focus:outline-none"
+              />
+              <label htmlFor="dont-show-again" className="text-sm text-gray-300 cursor-pointer">
+                Nicht mehr anzeigen
+              </label>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              onClick={handleInfoModalContinue}
+              className="w-full bg-[#FF006F] hover:bg-[#FF006F]/90 text-white"
+            >
+              Weiter →
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

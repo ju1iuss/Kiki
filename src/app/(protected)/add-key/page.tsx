@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Upload, X, ImagePlus, Tag, Plus, Save } from 'lucide-react'
+import { X, ImagePlus, Tag, Plus, Save, ArrowLeft } from 'lucide-react'
 
 export default function AddKeyPage() {
   const router = useRouter()
@@ -19,6 +19,7 @@ export default function AddKeyPage() {
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [tags, setTags] = useState<string[]>([])
   const [newTagInput, setNewTagInput] = useState('')
+  const [showDescription, setShowDescription] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const commonTags = ['Arbeit', 'Privat', 'API', 'Produktion', 'Entwicklung', 'Test', 'Staging']
@@ -45,15 +46,87 @@ export default function AddKeyPage() {
     }
   }, [])
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const cropImageTo3x5 = (imageData: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      img.onload = () => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'))
+          return
+        }
+
+        const targetAspectRatio = 3 / 5 // 0.6
+        const imgWidth = img.width
+        const imgHeight = img.height
+        const imgAspectRatio = imgWidth / imgHeight
+
+        let cropWidth: number
+        let cropHeight: number
+        let cropX: number
+        let cropY: number
+
+        // Calculate crop dimensions to fit 3:5 aspect ratio
+        if (imgAspectRatio > targetAspectRatio) {
+          // Image is wider than target ratio, fit to height
+          cropHeight = imgHeight
+          cropWidth = cropHeight * targetAspectRatio
+          cropX = (imgWidth - cropWidth) / 2 // Center horizontally
+          cropY = 0
+        } else {
+          // Image is taller than target ratio, fit to width
+          cropWidth = imgWidth
+          cropHeight = cropWidth / targetAspectRatio
+          cropX = 0
+          cropY = (imgHeight - cropHeight) / 2 // Center vertically
+        }
+
+        // Set canvas to exact 3:5 dimensions
+        const outputWidth = 600
+        const outputHeight = 1000
+        canvas.width = outputWidth
+        canvas.height = outputHeight
+
+        // Draw the cropped image to canvas
+        ctx.drawImage(
+          img,
+          cropX, cropY, cropWidth, cropHeight, // Source rectangle
+          0, 0, outputWidth, outputHeight // Destination rectangle
+        )
+
+        resolve(canvas.toDataURL('image/jpeg', 0.9))
+      }
+      img.onerror = () => reject(new Error('Failed to load image'))
+      img.src = imageData
+    })
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setImageFile(file)
       const reader = new FileReader()
-      reader.onload = (e) => {
-        const previewUrl = e.target?.result as string
-        setImagePreview(previewUrl)
-        setShowQuickAdd(true) // Show quick-add interface for file uploads
+      reader.onload = async (e) => {
+        const originalDataUrl = e.target?.result as string
+        try {
+          // Crop image to 3:5 aspect ratio
+          const croppedDataUrl = await cropImageTo3x5(originalDataUrl)
+          setImagePreview(croppedDataUrl)
+          
+          // Convert cropped data URL back to File for upload
+          const response = await fetch(croppedDataUrl)
+          const blob = await response.blob()
+          const croppedFile = new File([blob], file.name || 'key-image.jpg', { type: 'image/jpeg' })
+          setImageFile(croppedFile)
+          
+          setShowQuickAdd(true) // Show quick-add interface for file uploads
+        } catch (error) {
+          console.error('Error cropping image:', error)
+          // Fallback to original image if cropping fails
+          setImagePreview(originalDataUrl)
+          setImageFile(file)
+          setShowQuickAdd(true)
+        }
       }
       reader.readAsDataURL(file)
     }
@@ -207,144 +280,171 @@ export default function AddKeyPage() {
   // Show quick-add interface when image is captured/uploaded
   if (showQuickAdd && imagePreview) {
     return (
-      <div className="min-h-screen bg-black">
-        <div className="px-4 py-6 max-w-md mx-auto space-y-6">
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white font-marlinsoft mb-2">
-              Neuen Schlüssel hinzufügen
-            </h1>
-            <p className="text-gray-400 text-sm">Gib deinem Schlüssel einen Namen und Tags</p>
-          </div>
-
-          {/* Image Preview */}
-          <div className="bg-[#191919] rounded-xl p-4 border border-white/10">
-            <img
-              src={imagePreview}
-              alt="Key preview"
-              className="w-full h-auto rounded-lg max-h-64 object-contain"
-            />
-          </div>
-
-          {/* Quick Name Input */}
-          <div>
-            <label className="text-sm font-medium text-gray-300 mb-2 block">
-              Name <span className="text-[#FF006F]">*</span>
-            </label>
-            <Input
-              type="text"
-              value={keyName}
-              onChange={(e) => setKeyName(e.target.value)}
-              placeholder="z.B. Stripe API Key"
-              className="w-full h-12 bg-[#191919] border-white/10 text-white placeholder:text-gray-500 focus:border-[#FF006F] rounded-xl text-base"
-              autoFocus
-            />
-          </div>
-
-          {/* Description Input */}
-          <div>
-            <label className="text-sm font-medium text-gray-300 mb-2 block">
-              Beschreibung <span className="text-gray-500 text-xs">(optional)</span>
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Füge eine Beschreibung hinzu..."
-              className="w-full min-h-[100px] p-3 bg-[#191919] border border-white/10 text-white rounded-xl resize-y placeholder:text-gray-500 focus:outline-none focus:border-[#FF006F] text-base"
-              rows={3}
-            />
-          </div>
-
-          {/* Quick Tags */}
-          <div>
-            <label className="text-sm font-medium text-gray-300 mb-3 block">
-              Tags
-            </label>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {commonTags.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={`
-                    px-4 py-2 rounded-full text-sm font-medium transition-all
-                    ${tags.includes(tag)
-                      ? 'bg-[#FF006F] text-white'
-                      : 'bg-white/10 text-gray-300 hover:bg-white/20'
-                    }
-                  `}
-                >
-                  <Tag className="w-3 h-3 inline-block mr-1.5" />
-                  {tag}
-                </button>
-              ))}
-            </div>
-            
-            {/* Custom Tag Input */}
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                value={newTagInput}
-                onChange={(e) => setNewTagInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault()
-                    addCustomTag()
-                  }
-                }}
-                placeholder="Eigenes Tag hinzufügen"
-                className="flex-1 h-10 bg-[#191919] border-white/10 text-white placeholder:text-gray-500 focus:border-[#FF006F] rounded-lg text-sm"
+      <div className="min-h-screen bg-black flex items-start justify-center p-4 lg:items-center overflow-y-auto pb-24">
+        <div className="w-full max-w-lg bg-[#191919] rounded-2xl border border-white/10 overflow-hidden my-4">
+          <div className="flex flex-col p-8 space-y-6">
+            {/* Image Preview with Title and Name Input Overlay */}
+            <div className="relative bg-black rounded-xl border border-white/10 overflow-hidden mx-auto w-full max-w-[360px]" style={{ aspectRatio: '3/5' }}>
+              <img
+                src={imagePreview}
+                alt="Key preview"
+                className="w-full h-full object-contain"
               />
-              <Button
-                onClick={addCustomTag}
-                disabled={!newTagInput.trim()}
-                className="h-10 px-4 bg-white/10 text-white hover:bg-white/20 border border-white/10 disabled:opacity-50"
-              >
-                <Plus className="w-4 h-4" />
-              </Button>
+              
+              {/* Overlay with Title and Name Input */}
+              <div className="absolute inset-0 flex flex-col justify-between p-4 bg-gradient-to-b from-black/60 via-transparent to-black/60">
+                {/* Title */}
+                <div className="text-center pt-2">
+                  <h1 className="text-lg font-bold text-white font-marlinsoft">
+                    Neuen Schlüssel hinzufügen
+                  </h1>
+                </div>
+
+                {/* Name Input at Bottom */}
+                <div className="pb-2">
+                  <Input
+                    type="text"
+                    value={keyName}
+                    onChange={(e) => setKeyName(e.target.value)}
+                    placeholder="Name eingeben..."
+                    className="w-full h-10 bg-black/80 backdrop-blur-sm border-white/20 text-white placeholder:text-gray-400 focus:border-[#FF006F] rounded-lg text-sm px-3"
+                    autoFocus
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Selected Tags */}
-            {tags.length > 0 && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {tags.map((tag) => (
-                  <div
-                    key={tag}
-                    className="px-3 py-1.5 bg-[#FF006F]/20 text-[#FF006F] rounded-lg text-sm flex items-center gap-1.5"
-                  >
-                    <Tag className="w-3 h-3" />
-                    {tag}
+            {/* Description - Collapsible with Plus Icon */}
+            <div>
+              {!showDescription ? (
+                <button
+                  onClick={() => setShowDescription(true)}
+                  className="w-full flex items-center gap-2 px-4 py-3 bg-black/40 border border-white/10 rounded-lg hover:bg-black/60 transition-colors text-left"
+                >
+                  <Plus className="w-5 h-5 text-gray-400" />
+                  <span className="text-sm text-gray-300">Beschreibung hinzufügen</span>
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-gray-300">
+                      Beschreibung
+                    </label>
                     <button
-                      onClick={() => toggleTag(tag)}
-                      className="ml-1 hover:text-white transition-colors"
+                      onClick={() => {
+                        setShowDescription(false)
+                        setDescription('')
+                      }}
+                      className="text-gray-400 hover:text-white transition-colors"
                     >
-                      <X className="w-3 h-3" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
+                  <textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Füge eine Beschreibung hinzu..."
+                    className="w-full min-h-[100px] p-3 bg-black border border-white/10 text-white rounded-lg resize-none placeholder:text-gray-500 focus:outline-none focus:border-[#FF006F] text-sm"
+                    rows={4}
+                    autoFocus
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Quick Tags */}
+            <div>
+              <label className="text-sm font-medium text-gray-300 mb-3 block">
+                Tags
+              </label>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {commonTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={`
+                      px-3 py-1.5 rounded-full text-sm font-medium transition-all
+                      ${tags.includes(tag)
+                        ? 'bg-[#FF006F] text-white'
+                        : 'bg-white/10 text-gray-300 hover:bg-white/20'
+                      }
+                    `}
+                  >
+                    <Tag className="w-3.5 h-3.5 inline-block mr-1" />
+                    {tag}
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
+              
+              {/* Custom Tag Input */}
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  value={newTagInput}
+                  onChange={(e) => setNewTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      addCustomTag()
+                    }
+                  }}
+                  placeholder="Eigenes Tag"
+                  className="flex-1 h-10 bg-black border-white/10 text-white placeholder:text-gray-500 focus:border-[#FF006F] rounded-lg text-sm px-3"
+                />
+                <Button
+                  onClick={addCustomTag}
+                  disabled={!newTagInput.trim()}
+                  className="h-10 px-4 bg-white/10 text-white hover:bg-white/20 border border-white/10 disabled:opacity-50"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              onClick={() => {
-                router.push('/dashboard')
-              }}
-              className="flex-1 bg-white/10 text-white hover:bg-white/20 border border-white/20"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Abbrechen
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              disabled={!keyName.trim() || loading}
-              className="flex-1 bg-[#FF006F] text-white hover:bg-[#FF006F]/90 disabled:opacity-50"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {loading ? 'Speichern...' : 'Speichern'}
-            </Button>
+              {/* Selected Tags */}
+              {tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <div
+                      key={tag}
+                      className="px-3 py-1.5 bg-[#FF006F]/20 text-[#FF006F] rounded-lg text-sm flex items-center gap-2"
+                    >
+                      <Tag className="w-3.5 h-3.5" />
+                      {tag}
+                      <button
+                        onClick={() => toggleTag(tag)}
+                        className="ml-1 hover:text-white transition-colors"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Fixed Action Buttons - Icons Only */}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex gap-4 z-50">
+          <Button
+            onClick={() => {
+              router.push('/dashboard')
+            }}
+            className="w-14 h-14 rounded-full bg-white/10 text-white hover:bg-white/20 border border-white/20 flex items-center justify-center shadow-lg"
+          >
+            <X className="w-6 h-6" />
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={!keyName.trim() || loading}
+            className="w-14 h-14 rounded-full bg-[#FF006F] text-white hover:bg-[#FF006F]/90 disabled:opacity-50 flex items-center justify-center shadow-lg"
+          >
+            {loading ? (
+              <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Save className="w-6 h-6" />
+            )}
+          </Button>
         </div>
       </div>
     )
